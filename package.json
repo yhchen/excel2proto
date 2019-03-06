@@ -1,0 +1,31 @@
+{
+  "name": "excel_tiny_wrapper",
+  "version": "1.0.0",
+  "description": "excel export with type check using nodejs in super fast speed!",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yhchen",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "fs-extra-promise": "^1.0.1",
+    "json_to_lua": "^1.0.7",
+    "moment": "^2.22.2",
+    "xlsx": "^0.13.0"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/fs-extra-promise": "^1.0.6",
+    "@types/lodash": "^4.14.122",
+    "@types/moment": "^2.13.0",
+    "@types/node": "^10.3.4",
+    "@types/xlsx": "0.0.36",
+    "typescript": "^3.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yhchen/excel_tiny_wrapper"
+  }
+}
