@@ -19,7 +19,7 @@ if (process.argv.length >= 3 && fs.existsSync(process.argv[2])) {
 	};
 	check(gCfg, ConfTpl);
 }
-import {CTypeChecker,ETypeNames} from "./TypeChecker";
+import {CTypeChecker as CTypeParser,ETypeNames} from './CTypeParser';
 
 utils.SetEnableDebugOutput(gCfg.EnableDebugOutput);
 utils.SetLineBreaker(gCfg.LineBreak);
@@ -41,9 +41,9 @@ for (const exportCfg of gCfg.Export) {
 }
 
 const gRootDir = process.cwd();
-CTypeChecker.DateFmt = gCfg.DateFmt;
-CTypeChecker.TinyDateFmt = gCfg.TinyDateFmt;
-CTypeChecker.FractionDigitsFMT = gCfg.FractionDigitsFMT;
+CTypeParser.DateFmt = gCfg.DateFmt;
+CTypeParser.TinyDateFmt = gCfg.TinyDateFmt;
+CTypeParser.FractionDigitsFMT = gCfg.FractionDigitsFMT;
 
 async function HandleDir(dirName: string): Promise<void> {
 	let pa = await fs.readdirAsync(dirName);
@@ -63,24 +63,18 @@ function GetCellData(worksheet: xlsx.WorkSheet, c: number, r: number): xlsx.Cell
 }
 
 function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.WorkSheet): utils.SheetDataTable|undefined {
-	// find csv name
-	if (worksheet[gCfg.CSVNameCellID] == undefined || utils.NullStr(worksheet[gCfg.CSVNameCellID].w)) {
-		utils.logger(false, `excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" CSV name not defined. Ignore it!`);
-		return;
-	}
-	const TableName = worksheet[gCfg.CSVNameCellID].w;
-	if (gCfg.ExcludeSheetNames.indexOf(TableName) >= 0) {
-		utils.logger(true, `- Pass CSV "${TableName}"`);
+	if (utils.NullStr(sheetName) || sheetName[0] == "!" || gCfg.ExcludeSheetNames.indexOf(sheetName) >= 0) {
+		utils.logger(true, `- Pass Sheet "${sheetName}"`);
 		return;
 	}
 
-	const Range = xlsx.utils.decode_range(<string>worksheet["!ref"]);
+	const Range = xlsx.utils.decode_range(<string>worksheet['!ref']);
 	const ColumnMax = Range.e.c;
 	const RowMax = Range.e.r;
-	const ColumnArry = new Array<{cIdx:number, name:string, checker:CTypeChecker}>();
+	const ColumnArry = new Array<{cIdx:number, name:string, parser:CTypeParser}>();
 	// find max column and rows
-	let rIdx = 1;
-	const DataTable = new utils.SheetDataTable(TableName);
+	let rIdx = 0;
+	const DataTable = new utils.SheetDataTable(sheetName);
 	// find column name
 	for (; rIdx <= RowMax; ++rIdx) {
 		const firstCell = GetCellData(worksheet, 0, rIdx);
@@ -88,23 +82,15 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 			continue;
 		}
 		if (firstCell.w[0] == '#') {
-			if (gCfg.EnableExportCommentRows) {
-				const tmpArry = [];
-				for (let cIdx = 0; cIdx <= ColumnMax; ++cIdx) {
-					const cell = GetCellData(worksheet, cIdx, rIdx);
-					tmpArry.push((cell && cell.w)?cell.w:'');
-				}
-				DataTable.values.push({type:utils.ESheetRowType.comment, values: tmpArry})
-			}
 			continue;
 		}
 		const tmpArry = [];
 		for (let cIdx = 0; cIdx <= ColumnMax; ++cIdx) {
 			const cell = GetCellData(worksheet, cIdx, rIdx);
-			if (cell == undefined || cell.w == undefined || utils.NullStr(cell.w) || (gCfg.EnableExportCommentColumns == false && cell.w[0] == '#')) {
+			if (cell == undefined || cell.w == undefined || utils.NullStr(cell.w) || cell.w[0] == '#') {
 				continue;
 			}
-			ColumnArry.push({cIdx, name:cell.w, checker:(cell.w[0] == '#')?new CTypeChecker(ETypeNames.string):<any>undefined});
+			ColumnArry.push({cIdx, name:cell.w, parser:new CTypeParser(ETypeNames.string)});
 			tmpArry.push(cell.w);
 		}
 		DataTable.values.push({type:utils.ESheetRowType.header, values: tmpArry});
@@ -118,44 +104,28 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 			continue;
 		}
 		if (firstCell.w[0] == '#') {
-			if (gCfg.EnableExportCommentRows) {
-				const tmpArry = [];
-				for (let col of ColumnArry) {
-					const cell = GetCellData(worksheet, col.cIdx, rIdx);
-					tmpArry.push((cell && cell.w)?cell.w:'');
-				}
-				DataTable.values.push({type:utils.ESheetRowType.comment, values: tmpArry});
-			}
 			continue;
 		}
 
 		if (firstCell.w[0] != '*') {
-			utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" CSV Type Column not found!`);
+			utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" Sheet Type Column not found!`);
 		}
+		firstCell.w = firstCell.w.substr(1); // skip '*'
 		const tmpArry = [];
 		let typeHeader = new Array<utils.SheetHeader>();
 		for (const col of ColumnArry) {
 			const cell = GetCellData(worksheet, col.cIdx, rIdx);
-			if (col.checker != undefined) {
-				if (gCfg.EnableExportCommentColumns) {
-					const stype = (cell && cell.w)?cell.w:'';
-					tmpArry.push(stype);
-					typeHeader.push({name:col.name, typeChecker:col.checker, stype, comment:true});
-				}
-				continue;
-			}
 			if (cell == undefined || cell.w == undefined) {
-				utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" CSV Type Column "${utils.yellow_ul(col.name)}" not found!`);
+				utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" Sheet Type Column "${utils.yellow_ul(col.name)}" not found!`);
 				return;
 			}
-			const typeStr = col.cIdx == 0 ? cell.w.substr(1):cell.w;
 			try {
-				col.checker = new CTypeChecker(typeStr);
+				col.parser = new CTypeParser(cell.w);
 				tmpArry.push(cell.w);
-				typeHeader.push({name:col.name, typeChecker:col.checker, stype:cell.w, comment:false});
+				typeHeader.push({name:col.name, typeChecker:col.parser, stype:cell.w, comment:false});
 			} catch (ex) {
-				// new CTypeChecker(typeStr);
-				utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" CSV Type Column`
+				// new CTypeChecker(cell.w); // for debug used
+				utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" Sheet Type Column`
 						+ ` "${utils.yellow_ul(col.name)}" format error "${utils.yellow_ul(cell.w)}". expect is "${utils.yellow_ul(typeStr)}"!`, ex);
 			}
 		}
@@ -176,40 +146,31 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 					break;
 				}
 				else if (cell.w[0] == '#') {
-					if (gCfg.EnableExportCommentRows) {
-						const tmpArry = [];
-						for (let col of ColumnArry) {
-							const cell = GetCellData(worksheet, col.cIdx, rIdx);
-							tmpArry.push((cell && cell.w)?cell.w:'');
-						}
-						DataTable.values.push({type:utils.ESheetRowType.comment, values: tmpArry});
-					}
 					break;
 				}
 				firstCol = false;
 			}
 			const value = cell && cell.w ? cell.w : '';
-			// if (cell) {
-			// 	cell.w = utils.StringTranslate.ReplaceNewLineToLashN(cell.w||'');
-			// }
-			if (gCfg.EnableTypeCheck) {
-				if (!col.checker.CheckDataVaildate(cell)) {
-					col.checker.CheckDataVaildate(cell); // for debug used
-					utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" `
-								  + `CSV Cell "${utils.yellow_ul(utils.FMT26.NumToS26(col.cIdx)+(rIdx).toString())}" `
-								  + `format not match "${utils.yellow_ul(value)}" with ${utils.yellow_ul(col.checker.s)}!`);
-					return;
-				}
-			}
+			let colObj;
 			try {
-				tmpArry.push(col.checker.ParseDataByType(cell));
+				colObj = col.parser.ParseContent(cell);
+				tmpArry.push(colObj);
 			} catch (ex) {
 				// col.checker.ParseDataStr(cell);
 				utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" `
-							  + `CSV Cell "${utils.yellow_ul(utils.FMT26.NumToS26(col.cIdx)+(rIdx).toString())}" `
-							  + `Parse Data "${utils.yellow_ul(value)}" With ${utils.yellow_ul(col.checker.s)} `
+							  + `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(col.cIdx)+(rIdx).toString())}" `
+							  + `Parse Data "${utils.yellow_ul(value)}" With ${utils.yellow_ul(col.parser.s)} `
 							  + `Cause utils.exception "${utils.red(ex)}"!`);
 				return;
+			}
+			if (gCfg.EnableTypeCheck) {
+				if (!col.parser.CheckContentVaild(colObj)) {
+					col.parser.CheckContentVaild(colObj); // for debug used
+					utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" `
+								  + `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(col.cIdx)+(rIdx).toString())}" `
+								  + `format not match "${utils.yellow_ul(value)}" with ${utils.yellow_ul(col.parser.s)}!`);
+					return;
+				}
 			}
 		}
 		if (!firstCol) {
@@ -239,8 +200,9 @@ async function HandleExcelFile(fileName: string) {
 		cellHTML: false,//Parse rich text and save HTML to the .h field
 		cellText: true,//Generated formatted text to the .w field
 		cellDates: true,//Store dates as type d (default is n)
+		cellStyles: true,//Store style/theme info to the .s field
 		/**
-		 * If specified, use the string for date code 14 **
+		* If specified, use the string for date code 14 **
 		 * https://github.com/SheetJS/js-xlsx#parsing-options
 		 *		Format 14 (m/d/yy) is localized by Excel: even though the file specifies that number format,
 		 *		it will be drawn differently based on system settings. It makes sense when the producer and

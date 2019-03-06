@@ -1,7 +1,7 @@
 import * as utils from "../utils";
 import * as fs from "fs-extra-promise";
 import * as path from 'path';
-import { EType } from "../TypeChecker";
+import { EType } from "../CTypeParser";
 import * as json_to_lua from 'json_to_lua';
 
 function ParseJsonObject(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg) {
@@ -15,13 +15,7 @@ function ParseJsonObject(header: Array<utils.SheetHeader>, sheetRow: utils.Sheet
 		if (!hdr || hdr.comment) continue;
 		let val = sheetRow.values[i];
 		if (val != null) {
-			// FIXME : 特殊处理，json被用做Base类型(string)处理了，所以此处需要做一次特殊处理
-			// 后续可能升级json类型的处理方法
-			if (hdr.typeChecker.type.typename == "json") {
-				item[hdr.name] = JSON.parse(val);
-			} else {
-				item[hdr.name] = val;
-			}
+			item[hdr.name] = val;
 		} else if (exportCfg.UseDefaultValueIfEmpty) {
 			if (hdr.typeChecker.DefaultValue != undefined) {
 				item[hdr.name] = hdr.typeChecker.DefaultValue;

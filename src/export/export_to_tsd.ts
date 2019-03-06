@@ -1,7 +1,7 @@
 import * as fs from "fs-extra-promise";
 import * as path from "path";
 import * as utils from "../utils";
-import {ETypeNames,CType, EType} from "../TypeChecker";
+import {ETypeNames,CType, EType} from "../CTypeParser";
 
 const TSTypeTranslateMap = new Map<ETypeNames, {s:string, opt:boolean}>([
 	[ETypeNames.char,		{s:'number', opt:false}],
@@ -16,7 +16,6 @@ const TSTypeTranslateMap = new Map<ETypeNames, {s:string, opt:boolean}>([
 	[ETypeNames.double,		{s:'number', opt:false}],
 	[ETypeNames.float,		{s:'number', opt:false}],
 	[ETypeNames.bool,		{s:'boolean', opt:false}],
-	[ETypeNames.json,		{s:'any', opt:true}],
 	[ETypeNames.date,		{s:'string', opt:true}],
 	[ETypeNames.tinydate,	{s:'string', opt:true}],
 	[ETypeNames.timestamp,	{s:'number', opt:true}],
@@ -142,16 +141,6 @@ class TSDExport extends utils.IExportWrapper {
 						}
 					}
 					return tname;
-				}
-				break;
-			case EType.object:
-				if (type.obj)
-				{
-					let tname = `?: { `;
-					for (let tt in type.obj) {
-						tname += tt + this.GenTypeName(type.obj[tt], true) + `; `;
-					}
-					tname += `}`;
 				}
 				break;
 			default:

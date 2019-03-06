@@ -29,9 +29,6 @@
  *
  * Combination Type:
  *      -----------------------------------------------------------------------------
- *      | {<name>:<type>}   | start with '{' and end with '}' with json format.     |
- *      |                   | <type> is one of "Base Type" or "Combination Type".   |
- *      -----------------------------------------------------------------------------
  *      | <type>[<N>|null]  | <type> is one of "Base Type" or "Combination Type".   |
  *      |                   | <N> is empty(variable-length) or number.              |
  *      -----------------------------------------------------------------------------
@@ -39,10 +36,8 @@
  *      -----------------------------------------------------------------------------
  *      | vector3           | float[3]                                              |
  *      -----------------------------------------------------------------------------
- *      | json              | JSON.parse() is vaild                                 |
- *      -----------------------------------------------------------------------------
  */
-import { isArray, isObject, isNumber, isString } from 'util';
+import { isArray, isObject, isNumber, isString, isDate } from 'lodash';
 import * as moment from 'moment';
 
 function NullStr(s: string) {
@@ -138,7 +133,6 @@ export enum ETypeNames {
 	double		=	'double',		float		=	'float',
 	bool		=	'bool',
 	vector2		=	'vector2',		vector3		=	'vector3',
-	json		=	'json',
 	date		=	'date',			tinydate	=	'tinydate',
 	timestamp	=	'timestamp',	utctime		=	'utctime',
 };
@@ -162,7 +156,6 @@ const BaseNumberTypeSet = new Set<string>([ ETypeNames.char, ETypeNames.uchar, E
 const BaseDateTypeSet = new Set<string>([ ETypeNames.date, ETypeNames.tinydate, ETypeNames.timestamp, ETypeNames.utctime, ]);
 
 export const enum EType {
-	object,
 	array,
 	base,
 	date,
@@ -187,14 +180,14 @@ export class CTypeChecker
 			this._type = {type:EType.base, typename:ETypeNames.string, is_number:false};
 			return;
 		}
-		let tt = this._InitType({s, idx:0});
+		let tt = _ParseType({s, idx:0});
 		if (tt == undefined) throw `gen type check error: no data`;
 		this._type = tt;
 	}
 
 	public get s(): string { return this.__s; }
 	public get type(): CType { return this._type; }
-	public get isObjectOrArray(): boolean { return this._type.type == EType.object || this._type.type == EType.array; }
+	public get isArray(): boolean { return this._type.type == EType.array; }
 	public get DefaultValue(): any {
 		let r = TypeDefaultValue.get(this._type.typename);
 		return (r !== undefined) ? r.v : undefined;
@@ -213,79 +206,50 @@ export class CTypeChecker
 	public static set FractionDigitsFMT(v: number) { FractionDigitsFMT = v; console.log(`[TypeCheck] : Change Float precision to "${FractionDigitsFMT}"`); }
 	public static get FractionDigitsFMT(): number { return FractionDigitsFMT; }
 
-	public CheckDataVaildate(value: {w?:string, v?:string|number|boolean|Date}|undefined): boolean {
-		if (value == undefined || value.w == undefined || NullStr(value.w)) {
+	public CheckContentVaild(tmpObj: any): boolean {
+		if (tmpObj == undefined || NullStr(tmpObj)) {
 			return true;
 		}
-		if (this._type.is_number) {
-			if (!isNumber(value.v)) return false;
-			return CheckNumberInRange(value.v, this._type);
-		} else if (this._type.type == EType.date) {
-			return moment.isDate(value.v);
-		} else {
-			if (this._type.typename == ETypeNames.string) {
-				return true;
-			} else if (this._type.typename == ETypeNames.bool) {
-				return BooleanKeyMap.has(value.w.toLowerCase());
-			}
-			let tmpObj:any = undefined;
-			try {
-				tmpObj = JSON.parse(value.w);
-			} catch (ex) {
-				console.log(false, `Check Object Type JSON Parse ERROR. ${ex}`);
-				return false;
-			}
-			return this.CheckJsonType(tmpObj, this._type);
-		}
-		return true;
+		return this.CheckObjectType(tmpObj, this._type);
 	}
 
-	public ParseDataByType(value: {w?:string, v?:string|number|boolean|Date}|undefined): any {
+	/**
+	 * @description parse content by type
+	 */
+	public ParseContent(value: {w?:string, v?:string|number|boolean|Date}|undefined): any {
 		if (value == undefined || value.w == undefined || NullStr(value.w)) return undefined;
 		switch (this._type.type) {
 			case EType.array:
-				{
-					const tmpObj = JSON.parse(value.w);
-					if (!isArray(tmpObj)) throw `${value} is not a valid json type`;
-					if (this._type.next == undefined) throw `type array next is undefined`;
-					for (let i = 0; i < tmpObj.length; ++i) {
-						tmpObj[i] = CTypeChecker._ParseJsonTypeStr(tmpObj[i], this._type.next);
-					}
-					return tmpObj;
+				const tmpObj = JSON.parse(value.w);
+				if (!isArray(tmpObj)) throw `${value} is not a valid json type`;
+				if (this._type.next == undefined) throw `type array next is undefined`;
+				for (let i = 0; i < tmpObj.length; ++i) {
+					tmpObj[i] = _Parse(tmpObj[i], this._type.next);
 				}
-				break;
-			case EType.object:
-				{
-					const tmpObj = JSON.parse(value.w);
-					if (!isObject(tmpObj)) throw `${value} is not a valid json type`;
-					if (this._type.obj == undefined) return tmpObj;
-					for (let key in tmpObj) {
-						tmpObj[key] = CTypeChecker._ParseJsonTypeStr(tmpObj[key], this._type.obj[key]);
-					}
-					return tmpObj;
-				}
-				break;
+				return tmpObj;
 			case EType.base:
 				if (this._type.is_number) {
-					return CTypeChecker._FixNumberFmt(<any>value.v||value.w||'', this._type);
+					return _ParseNumber(<any>value.v||value.w||'', this._type);
 				} else if (this._type.typename == ETypeNames.bool) {
 					return BooleanKeyMap.get(value.w.toLowerCase());
+				} else {
+					return value.w
 				}
-				break;
 			case EType.date:
-				return CTypeChecker._FixDateFmt(value.v, this._type);
+				return _ParseDate(value.v, this._type);
+			default:
+				throw `unknown type = ${this._type.type}`
 		}
-		return value.w;
 	}
 
-	private CheckJsonType(tmpObj:any, type: CType|undefined) : boolean {
+	private CheckObjectType(tmpObj:any, type: CType|undefined) : boolean {
 		if (tmpObj == undefined || type == undefined)	return true;
 		switch (type.type) {
 		case EType.array:
 			if (!isArray(tmpObj)) return false;
 			if (type.num !== undefined && type.num != tmpObj.length) return false;
 			for (let i = 0; i < tmpObj.length; ++i) {
-				if (type.next == undefined || !this.CheckJsonType(tmpObj[i], type.next)) {
+				if (type.next == undefined || !this.CheckObjectType(tmpObj[i], type.next)) {
 					return false;
 				}
 			}
@@ -302,186 +266,141 @@ export class CTypeChecker
 			} else if (type.typename == ETypeNames.bool) {
 				return BooleanKeyMap.has(tmpObj.toLowerCase());
 			}
-			else if (type.typename == ETypeNames.json) {
-				return true;
-			}
 			return isString(tmpObj);
 		case EType.date:
 			return moment.default(tmpObj, DateFmt).isValid();
-		case EType.object:
-			if (!isObject(tmpObj)) return false;
-			if (!type.obj) return false;
-			for (let key in tmpObj) {
-				if (type.obj[key] == undefined) return false;
-				if (!this.CheckJsonType(tmpObj[key], type.obj[key])) {
-					return false;
-				}
-			}
-			break;
 		}
 		return true;
-	}
-
-	private _InitType(p:{s:string, idx:number}): CType|undefined {
-		let thisNode:CType|undefined = undefined;
-		// skip write space
-		if (p.idx >= p.s.length) undefined;
-		let result:CType;
-		if (p.s[p.idx] == '{') {
-			thisNode = {type:EType.object, is_number:false};
-			++p.idx;
-			while (true)
-			{
-				// find name:
-				const namescope = FindWord(p.s, p.idx);
-				if (!namescope) throw `gen type check error: object name not found!`;
-				const name = p.s.substr(namescope.start, namescope.len);
-				p.idx = namescope.end + 1;
-				if (p.s[p.idx++] != ':') throw `gen type check error: object name key not join with ':'`;
-				let tt = this._InitType(p);
-				if (!tt) throw `gen type check error: object name ${name} not found value!`;
-				if (p.idx >= p.s.length)	throw `gen type check error: '}' not found!`;
-				if (!thisNode.obj) thisNode.obj = {};
-				thisNode.obj[name] = tt;
-				if (p.s[p.idx] == ',') {
-					++p.idx;
-					if (p.idx >= p.s.length)	throw `gen type check error: '}' not found!`;
-				}
-				if (p.s[p.idx] == '}') {
-					++p.idx;
-					break;
-				}
-				if (p.idx >= p.s.length)	throw `gen type check error: '}' not found!`;
-			}
-		} else if (p.s[p.idx] == '[') {
-			++p.idx;
-			let num:number|undefined = undefined;
-			if (p.idx >= p.s.length)	throw `gen type check error: '}' not found!`;
-			if (p.s[p.idx] != ']') {
-				let numscope = FindNum(p.s, p.idx);
-				if (numscope == undefined) throw `gen type check error: array [<NUM>] format error!`;
-				p.idx = numscope.end+1;
-				num = parseInt(p.s.substr(numscope.start, numscope.len));
-			}
-			if (p.idx >= p.s.length)	throw `gen type check error: ']' not found!`;
-			if (p.s[p.idx] != ']') {
-				throw `gen type check error: array [<NUM>] ']' not found!`;
-			}
-			++p.idx;
-			let arrNode:CType = {type:EType.array, num, is_number:false};
-			if (p.idx < p.s.length && p.s[p.idx] == '[') {
-				let nextArrNode = this._InitType(p);
-				if (!nextArrNode) throw `gen type check error: multi array error!`;
-				arrNode.next = nextArrNode;
-			}
-			return arrNode;
-		} else {
-			const typescope = FindWord(p.s, p.idx);
-			if (!typescope) {
-				throw `gen type check error: base type not found!`;
-			}
-			const typename = p.s.substr(typescope.start, typescope.len);
-			if (!ETypeNames[<any>typename]) throw `gen type check error: base type = ${this._type.typename} not exist!`;
-			if (typename == ETypeNames.vector2 || typename == ETypeNames.vector3) {
-				thisNode = {type:EType.base, typename:ETypeNames.float, is_number:true};
-				const prevNode: CType = { type:EType.array, num:((typename==ETypeNames.vector2)?2:3), is_number:false };
-				prevNode.next = thisNode;
-				thisNode = prevNode;
-			} else {
-				thisNode = {type: BaseDateTypeSet.has(typename)?EType.date:EType.base, typename:<ETypeNames>typename, is_number:BaseNumberTypeSet.has(typename)};
-			}
-			p.idx = typescope.end+1;
-		}
-
-		if (p.s[p.idx] == '[') {
-			let tt = this._InitType(p);
-			if (tt == undefined) throw `gen type check error: [] type error`;
-			const typeNode = thisNode;
-			thisNode = tt;
-			while (tt.next != undefined) {
-				tt = tt.next;
-			}
-			tt.next = typeNode;
-		}
-		return thisNode;
-	}
-
-	private static _ParseJsonTypeStr(value: any, type: CType|undefined): any {
-		if (type == undefined) return value;
-		switch (type.type) {
-			case EType.array:
-				{
-					if (!isArray(value)) throw `${value} is not a valid json type`;
-					if (type.next == undefined) throw `type array next is undefined`;
-					for (let i = 0; i < value.length; ++i) {
-						value[i] = this._ParseJsonTypeStr(value[i], type.next);
-					}
-				}
-				return value;
-			case EType.object:
-				{
-					if (!isObject(value)) throw `${value} is not a valid json type`;
-					if (type.obj == undefined) return value;
-					for (let key in value) {
-						value[key] = this._ParseJsonTypeStr(value[key], type.obj[key]);
-					}
-				}
-				return value;
-			case EType.base:
-				if (type.is_number) {
-					return CTypeChecker._FixNumberFmt(value, type);
-				} else if (type.typename == ETypeNames.bool) {
-					return BooleanKeyMap.get(value.w.toLowerCase());
-				}
-				return value||'';
-			case EType.date:
-				return CTypeChecker._FixDateFmt(value, type);
-		}
-		return value||'';
-	}
-
-	private static _FixNumberFmt(n: number|string, type: CType): number {
-		if (isNumber(n)) {
-			let num = 0;
-			if (type.typename == ETypeNames.double || type.typename == ETypeNames.float) {
-				num = +n.toFixed(FractionDigitsFMT);
-			} else {
-				num = Math.floor(n);
-			}
-			// if (num < 1) {
-			// 	return num.toString().replace(/0\./g, '.');
-			// }
-			return num;
-		}
-		if (type.typename == ETypeNames.double || type.typename == ETypeNames.float) {
-			return CTypeChecker._FixNumberFmt(parseFloat(n), type);
-		}
-		return CTypeChecker._FixNumberFmt(parseInt(n), type);
-	}
-
-	private static _FixDateFmt(date: any, type: CType): string|number {
-		if (moment.isDate(date)) {
-			switch (type.typename) {
-				case ETypeNames.utctime:
-					return (Math.round(date.getTime() / 1000 + TimeZoneOffset));
-				case ETypeNames.timestamp:
-					return (Math.round(date.getTime() / 1000));
-				case ETypeNames.date:
-					return moment.default(date).format(DateFmt);
-				case ETypeNames.tinydate:
-					return moment.default(date).format(TinyDateFMT);
-			}
-		} else if (isString(date)) {
-			const Date = moment.default(date, DateFmt);
-			if (!Date.isValid()) throw `[TypeChecker] Date Type "${date}" Invalid!`;
-			return CTypeChecker._FixDateFmt(Date.toDate(), type);
-		}
-		return date||'';
 	}
 
 	private _type:CType;
 	private __s: string;
 }
+
+// private function
+function _ParseType(p:{s:string, idx:number}): CType|undefined {
+	let thisNode:CType|undefined = undefined;
+	// skip write space
+	if (p.idx >= p.s.length) undefined;
+	if (p.s[p.idx] == '[') {
+		++p.idx;
+		let num:number|undefined = undefined;
+		if (p.idx >= p.s.length)	throw `gen type check error: '}' not found!`;
+		if (p.s[p.idx] != ']') {
+			let numscope = FindNum(p.s, p.idx);
+			if (numscope == undefined) throw `gen type check error: array [<NUM>] format error!`;
+			p.idx = numscope.end+1;
+			num = parseInt(p.s.substr(numscope.start, numscope.len));
+		}
+		if (p.idx >= p.s.length)	throw `gen type check error: ']' not found!`;
+		if (p.s[p.idx] != ']') {
+			throw `gen type check error: array [<NUM>] ']' not found!`;
+		}
+		++p.idx;
+		let arrNode:CType = {type:EType.array, num, is_number:false};
+		if (p.idx < p.s.length && p.s[p.idx] == '[') {
+			let nextArrNode = _ParseType(p);
+			if (!nextArrNode) throw `gen type check error: multi array error!`;
+			arrNode.next = nextArrNode;
+		}
+		return arrNode;
+	} else {
+		const typescope = FindWord(p.s, p.idx);
+		if (!typescope) {
+			throw `gen type check error: base type not found!`;
+		}
+		const typename = p.s.substr(typescope.start, typescope.len);
+		if (!ETypeNames[<any>typename]) throw `gen type check error: base type = ${typename} not exist!`;
+		if (typename == ETypeNames.vector2 || typename == ETypeNames.vector3) {
+			thisNode = {type:EType.base, typename:ETypeNames.float, is_number:true};
+			const prevNode: CType = { type:EType.array, num:((typename==ETypeNames.vector2)?2:3), is_number:false };
+			prevNode.next = thisNode;
+			thisNode = prevNode;
+		} else {
+			thisNode = {type: BaseDateTypeSet.has(typename)?EType.date:EType.base, typename:<ETypeNames>typename, is_number:BaseNumberTypeSet.has(typename)};
+		}
+		p.idx = typescope.end+1;
+	}
+
+	if (p.s[p.idx] == '[') {
+		let tt = _ParseType(p);
+		if (tt == undefined) throw `gen type check error: [] type error`;
+		const typeNode = thisNode;
+		thisNode = tt;
+		while (tt.next != undefined) {
+			tt = tt.next;
+		}
+		tt.next = typeNode;
+	}
+	return thisNode;
+}
+
+function _ParseDate(date: any, type: CType): string|number {
+	if (type.type != EType.date) throw `value is not a date type`;
+	if (isDate(date)) {
+		switch (type.typename) {
+			case ETypeNames.utctime:
+				return (Math.round(date.getTime() / 1000 + TimeZoneOffset));
+			case ETypeNames.timestamp:
+				return (Math.round(date.getTime() / 1000));
+			case ETypeNames.date:
+				return moment.default(date).format(DateFmt);
+			case ETypeNames.tinydate:
+				return moment.default(date).format(TinyDateFMT);
+		}
+	} else if (isString(date)) {
+		const oDate = moment.default(date, DateFmt);
+		if (!oDate.isValid()) throw `[TypeChecker] Date Type "${date}" Invalid!`;
+		return _ParseDate(oDate.toDate(), type);
+	}
+	return date||'';
+}
+
+function _ParseNumber(n: number|string, type: CType): number {
+	if (!type.is_number) throw `value is not a number`;
+	if (isNumber(n)) {
+		let num = 0;
+		if (type.typename == ETypeNames.double || type.typename == ETypeNames.float) {
+			num = +n.toFixed(FractionDigitsFMT);
+		} else {
+			num = Math.floor(n);
+		}
+		// if (num < 1) {
+		// 	return num.toString().replace(/0\./g, '.');
+		// }
+		return num;
+	}
+	if (type.typename == ETypeNames.double || type.typename == ETypeNames.float) {
+		return _ParseNumber(parseFloat(n), type);
+	}
+	return _ParseNumber(parseInt(n), type);
+}
+
+function _Parse(value: any, type: CType|undefined): any {
+	if (type == undefined) return value;
+	switch (type.type) {
+		case EType.array:
+			{
+				if (!isArray(value)) throw `${value} is not a valid json type`;
+				if (type.next == undefined) throw `type array next is undefined`;
+				for (let i = 0; i < value.length; ++i) {
+					value[i] = _Parse(value[i], type.next);
+				}
+			}
+			return value;
+		case EType.base:
+			if (type.is_number) {
+				return _ParseNumber(value, type);
+			} else if (type.typename == ETypeNames.bool) {
+				return BooleanKeyMap.get(value.w.toLowerCase());
+			}
+			return value||'';
+		case EType.date:
+			return _ParseDate(value, type);
+	}
+	return value||'';
+}
+
 
 export function TestTypeChecker() {
 	console.log(new CTypeChecker('int'));

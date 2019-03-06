@@ -1,21 +1,18 @@
 excel_export_tools
 ==================
 
-
-excel export with type check using nodejs in super fast speed!
+excel export with type check using nodejs in super fast speed
 ---
 
 How To Use
 ---
 
 * Configure file is `config.json`. Add files and directory to `[IncludeFilesAndPath]` to dealing with. Add files to `[ExcludeFileNames]` to disable processing. Add table name to `[ExcludeCsvTableNames]` to disable processing.
-* Set output `table name` at cell `B1`(Default value). It can be change at config Key `[CSVNameCellID]`.
-* Add output table `Column Name` Row under `table name` Row. If a Column Name Start with `#` means is was a comment Column. It can be disable output at config `EnableExportCommentColumns`.
+* Add output table `Column Name` Row under `table name` Row. If a Column Name Start with `#` means is was a comment Column. And the Column will be ignored in the final export.
 * Add `Column Format Type` line under `Column Name` Row.
 * `[Export]`  is temporary not supported.
-* A comment Row was start with word `#` at `A Column`. Is can be disable output at config `EnableExportCommentRows`.
+* A comment Row was start with word `#` at `A Column`. And the Row will be ignored in the final export.
 * Cell `[N]A([N] is Row index)` start with `#` is a comment line.
-
 
 Support Format Export
 ---
@@ -28,10 +25,8 @@ js|Export as `js` format. Set `Export.ExportTemple` for export template. The too
 tsd|Export *.d.ts file for language `typescript` type check. Set `Export.ExportTemple` for export template. The tools will replace `{type}` with table type, and replace `{data}` with row type. If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
 lua|Support in future releases
 
-
 Support Format Check
 ---
-
 
 * Declare type definitions using grammar rules like typescript interface.
 * Support numeric type size overflow validation.

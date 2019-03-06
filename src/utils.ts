@@ -1,12 +1,12 @@
-export { isString, isNumber, isArray, isObject, isBoolean, isDate } from 'util';
+export { isString, isNumber, isArray, isObject, isBoolean } from 'lodash';
+export { isDate } from 'moment';
 import { isString } from 'util';
 import * as fs from 'fs-extra';
-import * as path from 'path';
 
 ////////////////////////////////////////////////////////////////////////////////
 /*************** console color ***************/
 import * as chalk from 'chalk';
-import { CTypeChecker } from './TypeChecker';
+import { CTypeChecker } from './CTypeParser';
 export const yellow_ul = chalk.default.yellow.underline;	//yellow under line
 export const yellow = chalk.default.yellow;
 export const red = chalk.default.redBright;
@@ -120,18 +120,15 @@ export const ExportExcelDataMap = new Map<string, SheetDataTable>();
 
 // line breaker
 export let LineBreaker = '\n';
-export let LineBreakerWords = '\\n';
 export function SetLineBreaker(v: string) {
 	LineBreaker = v;
-	LineBreakerWords = StringTranslate.TranslateEscapeCharToNonEscapeChar(LineBreaker);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // export config
 export type GlobalCfg = {
-	EnableExportCommentColumns: boolean;
-	EnableExportCommentRows: boolean;
 }
+
 export type ExportCfg = {
 	type: string;
 	OutputDir: string;
@@ -198,66 +195,5 @@ export module FMT26 {
 			result += (c.charCodeAt(0) - 64) * j;
 		}
 		return --result;
-	}
-}
-
-
-export module StringTranslate {
-	export function ReplaceNewLineToLashN(s: string): string {
-		let ret = '';
-		let startIdx = 0;
-		let curr = 0;
-		let hasReplacement = false;
-		while (true) {
-			curr = FindNextWordWithNoEscapeChar(s, '"', curr);
-			if (curr < 0) break;
-			const next = FindNextWordWithNoEscapeChar(s, '"', curr+1);
-			if (next < 0) break;
-			let locateNewLine = FindNextWordWithNoEscapeChar(s, '\n', curr+1, next - 1);
-			if (locateNewLine > 0) {
-				// need replace string
-				hasReplacement = true;
-				while (locateNewLine > 0) {
-					ret += s.substr(startIdx, locateNewLine - startIdx) + LineBreakerWords;
-					startIdx = locateNewLine + 1;
-					locateNewLine = FindNextWordWithNoEscapeChar(s, '\n', startIdx, next - 1);
-				}
-			}
-			curr = next+1;
-		}
-		if (hasReplacement) {
-			return ret + s.substr(startIdx, s.length - startIdx);
-		}
-		return s;
-	}
-
-	const EscapeList = ['\a','\b','\f','\n','\r','\t','\v','\\','\'','\"','\?'];
-	const NonEscapeList = ['\\a','\\b','\\f','\\n','\\r','\\t','\\v','\\\\','\\\'','\\"','\\?'];
-	const EscapeRegList = new Array<RegExp>();
-	for (let i = 0; i < EscapeList.length; ++i) {
-		EscapeRegList.push(new RegExp(NonEscapeList[i], 'g'));
-	}
-
-	export function TranslateEscapeCharToNonEscapeChar(s: string): string {
-		let ss = s;
-		for (let i = 0; i < EscapeRegList.length; ++i) {
-			ss = ss.replace(EscapeRegList[i], NonEscapeList[i]);
-		}
-		return ss;
-	}
-
-	// find next word not escapse character
-	function FindNextWordWithNoEscapeChar(str: string, w: string, startPos?: number, endPos?: number): number {
-		endPos = endPos ? Math.min(endPos, str.length) : str.length;
-		for (let i=startPos?startPos:0; i < endPos; ++i) {
-			if (str[i] == '\\') { // skip two words
-				++i;
-				continue;
-			}
-			if (str[i] == w) {
-				return i;
-			}
-		}
-		return -1;
 	}
 }
