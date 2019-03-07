@@ -126,7 +126,7 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 			} catch (ex) {
 				// new CTypeChecker(cell.w); // for debug used
 				utils.exception(`excel file "${utils.yellow_ul(fileName)}" sheet "${utils.yellow_ul(sheetName)}" Sheet Type Column`
-						+ ` "${utils.yellow_ul(col.name)}" format error "${utils.yellow_ul(cell.w)}". expect is "${utils.yellow_ul(typeStr)}"!`, ex);
+						+ ` "${utils.yellow_ul(col.name)}" format error "${utils.yellow_ul(cell.w)}"!`, ex);
 			}
 		}
 		DataTable.headerLst = typeHeader;
