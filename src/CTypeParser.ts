@@ -92,17 +92,17 @@ function FindNum(s: string, idx?: number): {start:number, end:number, len:number
 }
 
 let DateFmt: string = moment.HTML5_FMT.DATETIME_LOCAL_SECONDS;
-console.log(`[TypeCheck] : Default Date format is "${DateFmt}"`);
+console.log(`[TypeParser] : Default Date format is "${DateFmt}"`);
 
 let TinyDateFMT: string = 'YYYY/MM/DD';
-console.log(`[TypeCheck] : Default Tiny Date format is "${TinyDateFMT}"`);
+console.log(`[TypeParser] : Default Tiny Date format is "${TinyDateFMT}"`);
 
 const TimeZoneOffset = new Date().getTimezoneOffset() * 60;
-console.log(`[TypeCheck] : Time zone offset is "${TimeZoneOffset}"`);
+console.log(`[TypeParser] : Time zone offset is "${TimeZoneOffset}"`);
 
 // float precision count
 let FractionDigitsFMT = 6;
-console.log(`[TypeCheck] : Default Float PrecisionFMT count is "${FractionDigitsFMT}"`);
+console.log(`[TypeParser] : Default Float PrecisionFMT count is "${FractionDigitsFMT}"`);
 
 // number type range
 const NumberRangeMap = new Map<string, {min:number, max:number}>([
@@ -171,7 +171,7 @@ export interface CType
 	obj?: {[name:string]: CType};
 }
 
-export class CTypeChecker
+export class CTypeParser
 {
 	public constructor(typeString: string) {
 		this.__s = typeString;
@@ -197,13 +197,13 @@ export class CTypeChecker
 		return (r !== undefined) ? r.w : '';
 	}
 	// get and set Date Format
-	public static set DateFmt(s: string) { DateFmt = s; console.log(`[TypeCheck] : Change Date format to "${DateFmt}"`) }
+	public static set DateFmt(s: string) { DateFmt = s; console.log(`[TypeParser] : Change Date format to "${DateFmt}"`) }
 	public static get DateFmt(): string { return DateFmt; }
 	// get and set Tiny Date Format
-	public static set TinyDateFmt(s: string) { TinyDateFMT = s; console.log(`[TypeCheck] : Change Tiny Date format to "${TinyDateFMT}"`); }
+	public static set TinyDateFmt(s: string) { TinyDateFMT = s; console.log(`[TypeParser] : Change Tiny Date format to "${TinyDateFMT}"`); }
 	public static get TinyDateFmt(): string { return TinyDateFMT; }
 	// get and set Float Precision Format
-	public static set FractionDigitsFMT(v: number) { FractionDigitsFMT = v; console.log(`[TypeCheck] : Change Float precision to "${FractionDigitsFMT}"`); }
+	public static set FractionDigitsFMT(v: number) { FractionDigitsFMT = v; console.log(`[TypeParser] : Change Float precision to "${FractionDigitsFMT}"`); }
 	public static get FractionDigitsFMT(): number { return FractionDigitsFMT; }
 
 	public CheckContentVaild(tmpObj: any): boolean {
@@ -327,8 +327,13 @@ function _ParseType(p:{s:string, idx:number}): CType|undefined {
 		if (tt == undefined) throw `gen type check error: [] type error`;
 		const typeNode = thisNode;
 		thisNode = tt;
+		let arrDepth = tt.type == EType.array ? 1 : 0;
 		while (tt.next != undefined) {
 			tt = tt.next;
+			arrDepth += tt.type == EType.array ? 1 : 0;
+		}
+		if (arrDepth > 2) {
+			throw `Type "${p.s}" Array Level More Than 2 Is Not Allowed.`;
 		}
 		tt.next = typeNode;
 	}
@@ -350,7 +355,7 @@ function _ParseDate(date: any, type: CType): string|number {
 		}
 	} else if (isString(date)) {
 		const oDate = moment.default(date, DateFmt);
-		if (!oDate.isValid()) throw `[TypeChecker] Date Type "${date}" Invalid!`;
+		if (!oDate.isValid()) throw `[TypeParserer] Date Type "${date}" Invalid!`;
 		return _ParseDate(oDate.toDate(), type);
 	}
 	return date||'';
@@ -402,16 +407,16 @@ function _Parse(value: any, type: CType|undefined): any {
 }
 
 
-export function TestTypeChecker() {
-	console.log(new CTypeChecker('int'));
-	console.log(new CTypeChecker('string'));
-	console.log(new CTypeChecker('int[]'));
-	console.log(new CTypeChecker('int[2]'));
-	console.log(new CTypeChecker('int[][2]'));
-	console.log(new CTypeChecker('int[][]'));
-	console.log(new CTypeChecker('{t:string}'));
-	console.log(new CTypeChecker('{t:string, t1:string}'));
-	console.log(new CTypeChecker('{t:string, t1:string}[]'));
-	console.log(new CTypeChecker('{t:string, t1:{ut1:string}}[]'));
-	console.log(new CTypeChecker('{t:string, t1:{ut1:string}[]}[]'));
+export function TestTypeParser() {
+	console.log(new CTypeParser('int'));
+	console.log(new CTypeParser('string'));
+	console.log(new CTypeParser('int[]'));
+	console.log(new CTypeParser('int[2]'));
+	console.log(new CTypeParser('int[][2]'));
+	console.log(new CTypeParser('int[][]'));
+	console.log(new CTypeParser('{t:string}'));
+	console.log(new CTypeParser('{t:string, t1:string}'));
+	console.log(new CTypeParser('{t:string, t1:string}[]'));
+	console.log(new CTypeParser('{t:string, t1:{ut1:string}}[]'));
+	console.log(new CTypeParser('{t:string, t1:{ut1:string}[]}[]'));
 }

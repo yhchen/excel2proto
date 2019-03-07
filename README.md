@@ -7,7 +7,8 @@ excel export with type check using nodejs in super fast speed
 How To Use
 ---
 
-* Configure file is `config.json`. Add files and directory to `[IncludeFilesAndPath]` to dealing with. Add files to `[ExcludeFileNames]` to disable processing. Add table name to `[ExcludeCsvTableNames]` to disable processing.
+* Configure file is `config.json`. Add files and directory to `[IncludeFilesAndPath]` to dealing with.
+* If the first character of the `file name` is "`!`" it will be `ignored` for export. `Sheet names` also apply to this rule.
 * Add output table `Column Name` Row under `table name` Row. If a Column Name Start with `#` means is was a comment Column. And the Column will be ignored in the final export.
 * Add `Column Format Type` line under `Column Name` Row.
 * `[Export]`  is temporary not supported.

@@ -52,11 +52,16 @@ class CSVExport extends utils.IExportWrapper {
 			utils.exception(`output path "${utils.yellow_ul(outdir)}" not exists!`);
 			return false;
 		}
-		let tmpArr = new Array<string>();
-		for (let row of dt.values) {
-			tmpArr.push(ParseCSVLine(dt.headerLst, row, cfg, this._exportCfg));
+		let arrTmp = new Array<string>();
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
+		if (arrExportHeader.length <= 0) {
+			utils.logger(false, `Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
+			return true;
 		}
-		const csvcontent = tmpArr.join(utils.LineBreaker) + utils.LineBreaker;
+		for (let row of dt.arrValues) {
+			arrTmp.push(ParseCSVLine(arrExportHeader, row, cfg, this._exportCfg));
+		}
+		const csvcontent = arrTmp.join(utils.LineBreaker) + utils.LineBreaker;
 		await fs.writeFileAsync(path.join(outdir, dt.name+this._exportCfg.ExtName), csvcontent, {encoding:'utf8', flag:'w+'});
 
 		utils.logger(true, `${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(path.join(outdir, dt.name+this._exportCfg.ExtName))}". `

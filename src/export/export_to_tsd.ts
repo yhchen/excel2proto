@@ -54,7 +54,8 @@ class TSDExport extends utils.IExportWrapper {
 			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not found Keyword ${utils.yellow_ul("{type}")}!`);
 			return false;
 		}
-		let ctx = this.GenSheetType(dt.name, dt.headerLst);
+		let ctx = this.GenSheetType(dt.name, dt.arrTypeHeader);
+		if (!ctx) return true;
 		let interfaceContent = FMT.replace('{data}', ctx.type).replace('{type}', ctx.tbtype);
 		const outfile = outdir + dt.name + this._exportCfg.ExtName;
 		await fs.writeFileAsync(outfile, interfaceContent, {encoding:'utf8', flag:'w'});
@@ -89,9 +90,11 @@ class TSDExport extends utils.IExportWrapper {
 		const exportexp = FMT.indexOf('export') >= 0 ?'export ':'';
 		for (let iter of utils.ExportExcelDataMap) {
 			const name = iter[1].name;
-			let ctx = this.GenSheetType(name, iter[1].headerLst);
-			data += `${exportexp}${ctx.type}${exportexp}${ctx.tbtype}\n\n`;
-			type += `\t${name}:T${name};\n`;
+			let ctx = this.GenSheetType(name, iter[1].arrTypeHeader);
+			if (ctx) {
+				data += `${exportexp}${ctx.type}${exportexp}${ctx.tbtype}\n\n`;
+				type += `\t${name}:T${name};\n`;
+			}
 		}
 		type += `}\n`;
 		FMT.indexOf('{data}');
@@ -101,9 +104,15 @@ class TSDExport extends utils.IExportWrapper {
 						+  `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 	}
 
-	private GenSheetType(sheetName: string, headerLst: utils.SheetHeader[]): {type:string, tbtype:string} {
+	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[]): {type:string, tbtype:string}|undefined {
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader)
+		if (arrExportHeader.length <= 0) {
+			utils.logger(false, `Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
+			return;
+		}
+
 		let type = `type ${sheetName} = {\n`;
-		for (let header of headerLst) {
+		for (let header of arrExportHeader) {
 			if (header.comment) continue;
 			type += `\t${header.name}${this.GenTypeName(header.typeChecker.type, false)};\n`;
 		}

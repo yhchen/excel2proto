@@ -4,17 +4,18 @@ import { isString } from 'util';
 import * as fs from 'fs-extra';
 
 ////////////////////////////////////////////////////////////////////////////////
-/*************** console color ***************/
+//#region console color
 import * as chalk from 'chalk';
-import { CTypeChecker } from './CTypeParser';
+import { CTypeParser } from './CTypeParser';
 export const yellow_ul = chalk.default.yellow.underline;	//yellow under line
 export const yellow = chalk.default.yellow;
 export const red = chalk.default.redBright;
 export const green = chalk.default.greenBright;
 export const brightWhite = chalk.default.whiteBright.bold
+//#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
-/************ logger function **************/
+//#region Logger
 export let EnableDebugOutput: boolean = true;
 export function SetEnableDebugOutput(b: boolean) { EnableDebugOutput = b; }
 export function logger(debugMode: boolean, ...args: any[]) {
@@ -31,20 +32,21 @@ export function exception(txt: string, ex?:any): never {
 	if (ex) { logger(false, red(ex)); }
 	throw txt;
 }
+//#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
-/************* base function ***************/
+//#region base function
 export function NullStr(s: string) {
 	if (isString(s)) {
 		return s.trim().length <= 0;
 	}
 	return true;
 }
-
+//#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
+//#region Time Profile
 /************* total use tick ****************/
-// timer calc
 let BeforeExistHandler: ()=>void;
 export function SetBeforeExistHandler(handler: ()=>void) {
 	BeforeExistHandler = handler;
@@ -85,9 +87,10 @@ export module TimeUsed
 		}
 	});
 }
+//#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
-// Datas ...
+//#region Datas 
 // excel gen data table
 export enum ESheetRowType {
 	header = 1,
@@ -102,18 +105,17 @@ export type SheetRow = {
 export type SheetHeader = {
 	name: string, // name
 	stype: string, // type string
-	typeChecker: CTypeChecker, // type checker
+	typeChecker: CTypeParser, // type checker
 	comment: boolean; // is comment line?
+	color: string; // group
 }
 export class SheetDataTable {
 	constructor(name: string) {
 		this.name = name;
-		this.headerLst = new Array();
-		this.values = new Array();
 	}
 	public name: string;
-	public headerLst: Array<SheetHeader>;
-	public values: Array<SheetRow>;
+	public arrTypeHeader = new Array<SheetHeader>();
+	public arrValues = new Array<SheetRow>();
 }
 // all export data here
 export const ExportExcelDataMap = new Map<string, SheetDataTable>();
@@ -124,8 +126,10 @@ export function SetLineBreaker(v: string) {
 	LineBreaker = v;
 }
 
+//#endregion
+
 ////////////////////////////////////////////////////////////////////////////////
-// export config
+//#region export config
 export type GlobalCfg = {
 }
 
@@ -133,6 +137,7 @@ export type ExportCfg = {
 	type: string;
 	OutputDir: string;
 	UseDefaultValueIfEmpty: boolean;
+	GroupFilter: Array<string>;
 	ExportTemple?: string;
 	ExtName?: string;
 }
@@ -162,6 +167,40 @@ export abstract class IExportWrapper {
 	protected _exportCfg: ExportCfg;
 }
 
+
+export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<SheetHeader>): Array<SheetHeader> {
+	const gCfg = require('./config').gCfg
+	let result = new Array<SheetHeader>();
+	if (arrGrpFilters.length <= 0) return result;
+	// translate
+	const RealFilter = new Array<string>();
+	for (const ele of arrGrpFilters) {
+		let found = false;
+		for (const name in gCfg.ColorToGroupMap) {
+			if (gCfg.ColorToGroupMap[name] == ele) {
+				RealFilter.push(name);
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			logger(false, `Filter Name ${yellow_ul(ele)} Not foud In ${yellow_ul('ColorToGroupMap')}. Ignore It!`);
+		}
+	}
+	// filter
+	if (RealFilter.includes('*')) {
+		return arrHeader;
+	}
+	for (const header of arrHeader) {
+		if (RealFilter.includes(header.color)) {
+			result.push(header);
+		}
+	}
+
+	return result;
+}
+
+
 export type ExportWrapperFactory = (cfg: ExportCfg)=>IExportWrapper;
 export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['csv', require('./export/export_to_csv')],
@@ -171,8 +210,10 @@ export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['lua', require('./export/export_to_lua')],
 ]);
 
+//#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
+//#region Format Converter
 export module FMT26 {
 	export function NumToS26(num: number): string{
 		let result="";
@@ -197,3 +238,6 @@ export module FMT26 {
 		return --result;
 	}
 }
+
+//#endregion
+

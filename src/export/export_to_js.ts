@@ -53,8 +53,13 @@ class JSExport extends utils.IExportWrapper {
 	public async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let jsObj = {};
-		for (let row of dt.values) {
-			ParseJSLine(dt.headerLst, row, jsObj, cfg, this._exportCfg);
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
+		if (arrExportHeader.length <= 0) {
+			utils.logger(false, `Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
+			return true;
+		}
+		for (let row of dt.arrValues) {
+			ParseJSLine(arrExportHeader, row, jsObj, cfg, this._exportCfg);
 		}
 		if (this.IsFile(outdir)) {
 			this._globalObj[dt.name] = jsObj;
