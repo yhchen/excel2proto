@@ -37,28 +37,40 @@ Support Format Check
 
 type|desc
 ---|---
-char|min:-127                  max:127
-uchar|min:0                     max:255
-short|min:-32768                max:32767
-ushort|min:0                     max:65535
-int|min:-2147483648           max:2147483647
-uint|min:0                     max:4294967295
-int64|min:-9223372036854775808  max:9223372036854775807
-uint64|min:0                     max:18446744073709551615
-string|auto change 'line break' to '\n
-double|...
-float|...
-bool|true: 'true' or '1'       false: 'false' empty or '0
-date|YYYY/MM/DD HH:mm:ss
-tinydate|YYYY/MM/DD
-timestamp|Linux time stamp
-utctime|UTC time stamp
+`char`|min:-127                  max:127
+`uchar`|min:0                     max:255
+`short`|min:-32768                max:32767
+`ushort`|min:0                     max:65535
+`int`|min:-2147483648           max:2147483647
+`uint`|min:0                     max:4294967295
+`int64`|min:-9223372036854775808  max:9223372036854775807
+`uint64`|min:0                     max:18446744073709551615
+`string`|auto change 'line break' to '\n
+`double`|no limit
+`float`|no limit
+`bool`|true: 'true' or '1'       false: 'false' empty or '0
+`date`|YYYY/MM/DD HH:mm:ss
+`tinydate`|YYYY/MM/DD
+`timestamp`|Linux time stamp
+`utctime`|UTC time stamp
 
 ### Combination Type:
 
 type|desc
 ---|---
-`<type>[<N> or null]`  | `<type>` is one of "Base Type" or "Combination Type". `<N>` is empty(variable-length) or number.<br/><b>`ATTENTION : For a better numerical configuration experience, the array depth should be no more than two layers.`</b>
-`vector2`           | float\[2\]
-`vector3`           | float\[3\]
+`<type>[<N> or null]`  | `<type>` is one of "Base Type" or "Combination Type". `<N>` is empty(variable-length) or number.<br/><b>`ATTENTION : For a better numerical configuration experience, the array depth should be no more than two levels.`</b>
+`vector2`           | Equals to `float[2]`
+`vector3`           | Equals to `float[3]`
+
+
+### Simple Array Format:
+
+Separator :
+* "`,`" is the first level separator
+* "`;`" is the second level separator
+* "`\n`" is the third level separator
+
+Example : 
+> Type : `int[][]`  
+> Data : `1,2;3,4,5`  
 
