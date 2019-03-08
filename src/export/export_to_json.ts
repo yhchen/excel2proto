@@ -28,7 +28,7 @@ class JSONExport extends utils.IExportWrapper {
 		let jsonObj = {};
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
 		if (arrExportHeader.length <= 0) {
-			utils.logger(false, `Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
+			utils.logger(true, `Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
 			return true;
 		}
 		for (let row of dt.arrValues) {

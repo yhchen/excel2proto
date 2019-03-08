@@ -77,8 +77,12 @@ function GetCellFrontGroudColor(cell: xlsx.CellObject) : string {
 }
 
 function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.WorkSheet): utils.SheetDataTable|undefined {
+	if (worksheet['!ref'] == undefined) {
+		utils.logger(true, `- Pass Sheet "${sheetName}" : Sheet is empty`);
+		return;
+	}
 	if (utils.NullStr(sheetName) || sheetName[0] == "!") {
-		utils.logger(true, `- Pass Sheet "${sheetName}"`);
+		utils.logger(true, `- Pass Sheet "${sheetName}" : Sheet Name start with "!"`);
 		return;
 	}
 

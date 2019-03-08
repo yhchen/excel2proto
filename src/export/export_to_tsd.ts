@@ -107,7 +107,7 @@ class TSDExport extends utils.IExportWrapper {
 	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[]): {type:string, tbtype:string}|undefined {
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader)
 		if (arrExportHeader.length <= 0) {
-			utils.logger(false, `Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
+			utils.logger(true, `Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
 			return;
 		}
 

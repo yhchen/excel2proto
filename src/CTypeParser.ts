@@ -166,6 +166,7 @@ export interface CType
 	type: EType;
 	is_number: boolean;
 	typename?: ETypeNames;
+	arr_level?: number; // array level
 	num?: number;
 	next?: CType;
 	obj?: {[name:string]: CType};
@@ -220,13 +221,14 @@ export class CTypeParser
 		if (value == undefined || value.w == undefined || NullStr(value.w)) return undefined;
 		switch (this._type.type) {
 			case EType.array:
-				const tmpObj = JSON.parse(value.w);
-				if (!isArray(tmpObj)) throw `${value} is not a valid json type`;
-				if (this._type.next == undefined) throw `type array next is undefined`;
-				for (let i = 0; i < tmpObj.length; ++i) {
-					tmpObj[i] = _Parse(tmpObj[i], this._type.next);
-				}
-				return tmpObj;
+				return _Parse(value.w, this._type);
+				// const tmpObj = JSON.parse(value.w);
+				// if (!isArray(tmpObj)) throw `${value} is not a valid json type`;
+				// if (this._type.next == undefined) throw `type array next is undefined`;
+				// for (let i = 0; i < tmpObj.length; ++i) {
+				// 	tmpObj[i] = _Parse(tmpObj[i], this._type.next, 0);
+				// }
+				// return tmpObj;
 			case EType.base:
 				if (this._type.is_number) {
 					return _ParseNumber(<any>value.v||value.w||'', this._type);
@@ -278,6 +280,15 @@ export class CTypeParser
 }
 
 // private function
+function _FixArrayLevel(type: CType): number {
+	if (type.next && type.next.type == EType.array) {
+		const lv = _FixArrayLevel(type.next) + 1;
+		type.arr_level = lv;
+		return lv;
+	}
+	type.arr_level = 0;
+	return 0;
+}
 function _ParseType(p:{s:string, idx:number}): CType|undefined {
 	let thisNode:CType|undefined = undefined;
 	// skip write space
@@ -313,7 +324,7 @@ function _ParseType(p:{s:string, idx:number}): CType|undefined {
 		if (!ETypeNames[<any>typename]) throw `gen type check error: base type = ${typename} not exist!`;
 		if (typename == ETypeNames.vector2 || typename == ETypeNames.vector3) {
 			thisNode = {type:EType.base, typename:ETypeNames.float, is_number:true};
-			const prevNode: CType = { type:EType.array, num:((typename==ETypeNames.vector2)?2:3), is_number:false };
+			const prevNode: CType = { type:EType.array, num:((typename==ETypeNames.vector2)?2:3), is_number:false, arr_level:0 };
 			prevNode.next = thisNode;
 			thisNode = prevNode;
 		} else {
@@ -327,15 +338,16 @@ function _ParseType(p:{s:string, idx:number}): CType|undefined {
 		if (tt == undefined) throw `gen type check error: [] type error`;
 		const typeNode = thisNode;
 		thisNode = tt;
-		let arrDepth = tt.type == EType.array ? 1 : 0;
+		thisNode = tt;
 		while (tt.next != undefined) {
 			tt = tt.next;
-			arrDepth += tt.type == EType.array ? 1 : 0;
-		}
-		if (arrDepth > 2) {
-			throw `Type "${p.s}" Array Level More Than 2 Is Not Allowed.`;
 		}
 		tt.next = typeNode;
+		let arrDepth = _FixArrayLevel(thisNode);
+		if (arrDepth >= 2) {
+			throw `Type "${p.s}" Array Level More Than 2 Is Not Allowed.`;
+		}
+
 	}
 	return thisNode;
 }
@@ -381,18 +393,25 @@ function _ParseNumber(n: number|string, type: CType): number {
 	return _ParseNumber(parseInt(n), type);
 }
 
+const ArrayLevelSpilter = [',', ';', '\n', '\0'];
+
 function _Parse(value: any, type: CType|undefined): any {
 	if (type == undefined) return value;
 	switch (type.type) {
 		case EType.array:
 			{
-				if (!isArray(value)) throw `${value} is not a valid json type`;
+				const Spliter = ArrayLevelSpilter[type.arr_level||0];
+				const arrStr = (<string>value).split(Spliter);
+				// if (!isArray(value)) throw `${value} is not a valid json type`;
 				if (type.next == undefined) throw `type array next is undefined`;
-				for (let i = 0; i < value.length; ++i) {
-					value[i] = _Parse(value[i], type.next);
+				if (type.num != undefined && type.num != arrStr.length) {
+					throw `type array length = "${type.num}" Actual = "${arrStr.length}". Error At : "${value}"`;
 				}
+				for (let i = 0; i < arrStr.length; ++i) {
+					arrStr[i] = _Parse(arrStr[i], type.next);
+				}
+				return arrStr;
 			}
-			return value;
 		case EType.base:
 			if (type.is_number) {
 				return _ParseNumber(value, type);
