@@ -3,6 +3,9 @@ export { isDate } from 'moment';
 import { isString } from 'util';
 import * as fs from 'fs-extra';
 
+import { gCfg } from './config';
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //#region console color
 import * as chalk from 'chalk';
@@ -24,7 +27,6 @@ export function logger(debugMode: boolean, ...args: any[]) {
 	}
 	console.log(...args);
 }
-function trace(...args: any[]) { logger(true, ...args); }
 let ExceptionLog = '';
 export function exception(txt: string, ex?:any): never {
 	ExceptionLog += `${red(`+ [ERROR] `)} ${txt}\n`
@@ -169,7 +171,6 @@ export abstract class IExportWrapper {
 
 
 export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<SheetHeader>): Array<SheetHeader> {
-	const gCfg = require('./config').gCfg
 	let result = new Array<SheetHeader>();
 	if (arrGrpFilters.length <= 0) return result;
 	// translate
@@ -177,7 +178,7 @@ export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<S
 	for (const ele of arrGrpFilters) {
 		let found = false;
 		for (const name in gCfg.ColorToGroupMap) {
-			if (gCfg.ColorToGroupMap[name] == ele) {
+			if ((<any>gCfg.ColorToGroupMap)[name] == ele) {
 				RealFilter.push(name);
 				found = true;
 				break;
