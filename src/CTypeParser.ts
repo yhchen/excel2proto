@@ -338,14 +338,13 @@ function _ParseType(p:{s:string, idx:number}): CType|undefined {
 		if (tt == undefined) throw `gen type check error: [] type error`;
 		const typeNode = thisNode;
 		thisNode = tt;
-		thisNode = tt;
 		while (tt.next != undefined) {
 			tt = tt.next;
 		}
 		tt.next = typeNode;
 		let arrDepth = _FixArrayLevel(thisNode);
-		if (arrDepth >= 2) {
-			throw `Type "${p.s}" Array Level More Than 2 Is Not Allowed.`;
+		if (arrDepth >= 3) {
+			throw `Type "${p.s}" Array Level More Than 3 Is Not Allowed.`;
 		}
 
 	}
@@ -402,15 +401,17 @@ function _Parse(value: any, type: CType|undefined): any {
 			{
 				const Spliter = ArrayLevelSpilter[type.arr_level||0];
 				const arrStr = (<string>value).split(Spliter);
+				const arrResult = new Array<any>();
 				// if (!isArray(value)) throw `${value} is not a valid json type`;
 				if (type.next == undefined) throw `type array next is undefined`;
 				if (type.num != undefined && type.num != arrStr.length) {
 					throw `type array length = "${type.num}" Actual = "${arrStr.length}". Error At : "${value}"`;
 				}
 				for (let i = 0; i < arrStr.length; ++i) {
-					arrStr[i] = _Parse(arrStr[i], type.next);
+					if (arrStr[i] == '') continue; // skip empty element
+					arrResult.push(_Parse(arrStr[i], type.next));
 				}
-				return arrStr;
+				return arrResult;
 			}
 		case EType.base:
 			if (type.is_number) {

@@ -29,9 +29,9 @@ export function logger(debugMode: boolean, ...args: any[]) {
 }
 let ExceptionLog = '';
 export function exception(txt: string, ex?:any): never {
-	ExceptionLog += `${red(`+ [ERROR] `)} ${txt}\n`
-	logger(false, red(`[ERROR] `) + txt);
-	if (ex) { logger(false, red(ex)); }
+	const LOG_CTX = `${red(`+ [ERROR] `)} ${txt}\n${red(ex?ex:'')}\n`;
+	ExceptionLog += LOG_CTX;
+	logger(false, LOG_CTX);
 	throw txt;
 }
 //#endregion
@@ -70,17 +70,18 @@ export module TimeUsed
 	let _LastAccess = _StartTime;
 
 	process.addListener('beforeExit', ()=>{
-		if (BeforeExistHandler) {
+		process.removeAllListeners('beforeExit');
+		const HasException = !NullStr(ExceptionLog);
+		if (BeforeExistHandler && !HasException) {
 			BeforeExistHandler();
 		}
-		process.removeAllListeners('beforeExit');
-		const color = NullStr(ExceptionLog) ? green : yellow;
-		logger(false, color("----------------------------------------"));
-		logger(false, color("-            DONE WITH ALL             -"));
-		logger(false, color("----------------------------------------"));
+		const color = HasException ? red : green;
+		logger(false, color(`----------------------------------------`));
+		logger(false, color(`-          ${HasException?'Got Exception !!!':'    Well Done    '}           -`));
+		logger(false, color(`----------------------------------------`));
 		logger(false, `Total Use Tick : "${yellow_ul(TotalElapse())}"`);
 
-		if (!NullStr(ExceptionLog)) {
+		if (HasException) {
 			logger(false, red("Exception Logs:"));
 			logger(false, ExceptionLog);
 			process.exit(-1);

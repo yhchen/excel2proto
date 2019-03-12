@@ -150,7 +150,7 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 				tmpArry.push(cell.w);
 				typeHeader.push({name:col.name, typeChecker:col.parser, stype:cell.w, comment:false, color:col.color});
 			} catch (ex) {
-				// new CTypeChecker(cell.w); // for debug used
+				// new CTypeParser(cell.w); // for debug used
 				utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" Sheet Type Row`
 						+ ` "${utils.yellow_ul(col.name)}" format error "${utils.yellow_ul(cell.w)}"!`, ex);
 			}
