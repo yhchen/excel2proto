@@ -58,7 +58,7 @@ type|desc
 
 type|desc
 ---|---
-`<type>[<N> or null]`  | `<type>` is one of "Base Type" or "Combination Type". `<N>` is empty(variable-length) or number.<br/><b>`ATTENTION : For a better numerical configuration experience, the array depth should be no more than two levels.`</b>
+`<type>[<N> or null]`  | `<type>` is one of "Base Type" or "Combination Type". `<N>` is empty(variable-length) or number.<br/><b>`ATTENTION : For a better numerical configuration experience, the array depth should be no more than three levels.`</b>
 `vector2`           | Equals to `float[2]`
 `vector3`           | Equals to `float[3]`
 
