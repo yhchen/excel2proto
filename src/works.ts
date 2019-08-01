@@ -92,7 +92,7 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 	const arrHeaderName = new Array<{cIdx:number, name:string, parser:CTypeParser, color:string}>();
 	// find max column and rows
 	let rIdx = 0;
-	const DataTable = new utils.SheetDataTable(sheetName);
+	const DataTable = new utils.SheetDataTable(sheetName, fileName);
 	// find column name
 	for (; rIdx <= RowMax; ++rIdx) {
 		const firstCell = GetCellData(worksheet, 0, rIdx);
@@ -251,6 +251,12 @@ async function HandleExcelFile(fileName: string) {
 		const worksheet = excel.Sheets[sheetName];
 		const datatable = HandleWorkSheet(fileName, sheetName, worksheet);
 		if (datatable) {
+			const oldDataTable = utils.ExportExcelDataMap.get(datatable.name);
+			if (oldDataTable) {
+				utils.exception(`found duplicate file name : ${utils.yellow_ul(datatable.name)} \n`
+								+ `at excel ${utils.yellow_ul(fileName)} \n`
+								+ `and excel ${utils.yellow_ul(oldDataTable.filename)}`);
+			}
 			utils.ExportExcelDataMap.set(datatable.name, datatable);
 			for (const handler of gExportWrapperLst) {
 				await handler.ExportTo(datatable, gCfg);

@@ -113,10 +113,12 @@ export type SheetHeader = {
 	color: string; // group
 }
 export class SheetDataTable {
-	constructor(name: string) {
+	constructor(name: string, filename: string) {
 		this.name = name;
+		this.filename = filename;
 	}
 	public name: string;
+	public filename: string;
 	public arrTypeHeader = new Array<SheetHeader>();
 	public arrValues = new Array<SheetRow>();
 }
