@@ -1,11 +1,8 @@
-excel_tiny_wrapper
-==================
+# excel_tiny_wrapper
 
-excel export with type check using nodejs in super fast speed
----
+## excel export with type check using nodejs in super fast speed
 
-How To Use
----
+## How To Use
 
 * Configure file is `config.json`. Add files and directory to `[IncludeFilesAndPath]` to dealing with.
 * If the first character of the `file name` is "`!`" it will be `ignored` for export. `Sheet names` also apply to this rule.
@@ -15,8 +12,7 @@ How To Use
 * A comment Row was start with word `#` at `A Column`. And the Row will be ignored in the final export.
 * Cell `[N]A([N] is Row index)` start with `#` is a comment line.
 
-Support Format Export
----
+## Support Format Export
 
 type|desc
 ---|---
@@ -26,14 +22,13 @@ js|Export as `js` format. Set `Export.ExportTemple` for export template. The too
 tsd|Export *.d.ts file for language `typescript` type check. Set `Export.ExportTemple` for export template. The tools will replace `{type}` with table type, and replace `{data}` with row type. If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
 lua|Support in future releases
 
-Support Format Check
----
+## Support Format Check
 
 * Declare type definitions using grammar rules like typescript interface.
 * Support numeric type size overflow validation.
 * More convenient type definitions for game developers(like vector2 vector3 etc...).
 
-### Base Type:
+### Base Type
 
 type|desc
 ---|---
@@ -54,7 +49,7 @@ type|desc
 `timestamp`|Linux time stamp
 `utctime`|UTC time stamp
 
-### Combination Type:
+### Combination Type
 
 type|desc
 ---|---
@@ -62,15 +57,14 @@ type|desc
 `vector2`           | Equals to `float[2]`
 `vector3`           | Equals to `float[3]`
 
-
-### Simple Array Format:
+### Simple Array Format
 
 Separator :
+
 * "`,`" is the first level separator
 * "`;`" is the second level separator
 * "`\n`" is the third level separator
 
-Example : 
+Example :
 > Type : `int[][]`  
 > Data : `1,2;3,4,5`  
-
