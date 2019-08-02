@@ -10,5 +10,10 @@
     "search.exclude": {
         "**/bin": true
     },
-    "editor.insertSpaces": false
+    "editor.insertSpaces": false,
+    "files.exclude": {
+        "**/*.js.map": true,
+        "node_modules": true,
+        "package-lock.json": true
+    }
 }
