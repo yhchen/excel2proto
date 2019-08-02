@@ -28,7 +28,7 @@ class JSONExport extends utils.IExportWrapper {
 		let jsonObj = {};
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
 		if (arrExportHeader.length <= 0) {
-			utils.logger(true, `Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
+			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
 			return true;
 		}
 		for (let row of dt.arrValues) {
@@ -44,7 +44,7 @@ class JSONExport extends utils.IExportWrapper {
 			const jsoncontent = JSON.stringify(jsonObj||"{}");
 			const outfile = path.join(outdir, dt.name+this._exportCfg.ExtName);
 			await fs.writeFileAsync(outfile, jsoncontent, {encoding:'utf8', flag:'w+'});
-			utils.logger(true, `${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
+			utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
 							 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 		}
 		return true;
@@ -59,7 +59,7 @@ class JSONExport extends utils.IExportWrapper {
 		}
 		const jsoncontent = JSON.stringify(this._globalObj||"{}");
 		fs.writeFileSync(outdir, jsoncontent, {encoding:'utf8', flag:'w+'});
-		utils.logger(true, `${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
+		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
 						 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 	}
 

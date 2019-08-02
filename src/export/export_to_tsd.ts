@@ -59,7 +59,7 @@ class TSDExport extends utils.IExportWrapper {
 		let interfaceContent = FMT.replace('{data}', ctx.type).replace('{type}', ctx.tbtype);
 		const outfile = outdir + dt.name + this._exportCfg.ExtName;
 		await fs.writeFileAsync(outfile, interfaceContent, {encoding:'utf8', flag:'w'});
-		utils.logger(true, `${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
+		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
 						+  `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 		return true;
 	}
@@ -100,14 +100,14 @@ class TSDExport extends utils.IExportWrapper {
 		FMT.indexOf('{data}');
 		data = FMT.replace('{data}', data).replace('{type}', type);
 		fs.writeFileSync(outdir, data, {encoding:'utf8', flag:'w'});
-		utils.logger(true, `${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
+		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
 						+  `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 	}
 
 	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[]): {type:string, tbtype:string}|undefined {
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader)
 		if (arrExportHeader.length <= 0) {
-			utils.logger(true, `Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
+			utils.debug(`Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
 			return;
 		}
 

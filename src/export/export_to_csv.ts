@@ -55,7 +55,7 @@ class CSVExport extends utils.IExportWrapper {
 		let arrTmp = new Array<string>();
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
 		if (arrExportHeader.length <= 0) {
-			utils.logger(true, `Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
+			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
 			return true;
 		}
 		for (let row of dt.arrValues) {
@@ -64,7 +64,7 @@ class CSVExport extends utils.IExportWrapper {
 		const csvcontent = arrTmp.join(utils.LineBreaker) + utils.LineBreaker;
 		await fs.writeFileAsync(path.join(outdir, dt.name+this._exportCfg.ExtName), csvcontent, {encoding:'utf8', flag:'w+'});
 
-		utils.logger(true, `${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(path.join(outdir, dt.name+this._exportCfg.ExtName))}". `
+		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(path.join(outdir, dt.name+this._exportCfg.ExtName))}". `
 							+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 
 		return true;

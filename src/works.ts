@@ -7,7 +7,8 @@ import {ETypeNames, CTypeParser} from './CTypeParser';
 ////////////////////////////////////////////////////////////////////////////////
 //#region Export Wrapper
 
-import {gCfg, gRootDir} from './config'
+import {gCfg, gRootDir, gGlobalIgnoreDirName} from './config'
+import { isFunction } from 'util';
 const gExportWrapperLst = new Array<utils.IExportWrapper>();
 for (const exportCfg of gCfg.Export) {
 	const Constructor = utils.ExportWrapperMap.get(exportCfg.type);
@@ -28,11 +29,51 @@ for (const exportCfg of gCfg.Export) {
 //#endregion
 
 
-export async function execute() {
+export async function execute() : Promise<boolean> {
 	if (!InitEnv()) {
 		utils.exception(`Init Env Failure!`);
 	}
+	if (!await HandleReadData()) {
+		utils.exception(`handle read excel data failure.`);
+		return false;
+	}
+	if (!HandleHighLevelTypeCheck()) {
+		utils.exception(`handle check hight level type failure.`);
+		return false;
+	}
+	if (!await HandleExportAll()) {
+		utils.exception(`handle export failure.`);
+		return false;
+	}
+	return true;
+}
 
+////////////////////////////////////////////////////////////////////////////////
+//#region private side
+const WorkerMonitor = new utils.AsyncWorkMonitor();
+async function HandleDir(dirName: string): Promise<boolean> {
+	if (gGlobalIgnoreDirName.has(path.basename(dirName))) {
+		utils.logger(`ignore folder ${dirName}`);
+	}
+	const pa = await fs.readdirAsync(dirName);
+	WorkerMonitor.addWork(pa.length);
+	pa.forEach(async function(fileName){
+		const filePath = path.join(dirName, fileName);
+		let info = await fs.statAsync(filePath);
+		if(!info.isFile()) {
+			WorkerMonitor.decWork();
+			return false;
+		}
+		if (!await HandleExcelFile(filePath)) {
+			WorkerMonitor.decWork();
+			return false;
+		}
+		WorkerMonitor.decWork();
+	});
+	return true;
+}
+
+async function HandleReadData(): Promise<boolean> {
 	for (let fileOrPath of gCfg.IncludeFilesAndPath) {
 		if (!path.isAbsolute(fileOrPath)) {
 			fileOrPath = path.join(gRootDir, fileOrPath);
@@ -42,27 +83,49 @@ export async function execute() {
 			break;
 		}
 		if (fs.statSync(fileOrPath).isDirectory()) {
-			await HandleDir(fileOrPath);
+			HandleDir(fileOrPath);
 		} else if (fs.statSync(fileOrPath).isFile()) {
-			await HandleExcelFile(fileOrPath);
+			if (!await HandleExcelFile(fileOrPath)) {
+				return false;
+			}
 		} else {
 			utils.exception(`UnHandle file or directory type : "${utils.yellow_ul(fileOrPath)}"`);
 		}
 	}
+	await WorkerMonitor.delay(1000);
+	await WorkerMonitor.WaitAllWorkDone();
+	return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//#region private side
-async function HandleDir(dirName: string): Promise<void> {
-	let pa = await fs.readdirAsync(dirName);
-	pa.forEach(async function(fileName, index){
-		const filePath = path.join(dirName, fileName);
-		let info = await fs.statAsync(filePath);
-		if(!info.isFile()) {
-			return;
+function HandleHighLevelTypeCheck(): boolean {
+	// const type_checker = require('./type_extens_checker').checker;
+	// // convert enum (key -> value) to (value -> key)
+	// for (let key in type_checker) {
+	// 	const node = type_checker[key];
+	// 	if(isFunction(node)) continue; // skip function
+	// 	let newNode: any = {};
+	// 	for (let kv of node) {
+	// 		newNode[kv[1]] = kv[0];
+	// 	}
+	// 	type_checker['_inn_R' + key] = newNode;
+	// }
+	let foundError = false;
+	for (const kv of utils.ExportExcelDataMap) {
+		const database = kv[1];
+		// FIXME : add code here
+	}
+	return !foundError;
+}
+
+async function HandleExportAll() : Promise<boolean> {
+	for (const kv of utils.ExportExcelDataMap) {
+		for (const handler of gExportWrapperLst) {
+			if (!await handler.ExportTo(kv[1], gCfg)) {
+				return false;
+			}
 		}
-		await HandleExcelFile(filePath);
-	});
+	}
+	return true;
 }
 
 function GetCellData(worksheet: xlsx.WorkSheet, c: number, r: number): xlsx.CellObject|undefined {
@@ -78,11 +141,11 @@ function GetCellFrontGroudColor(cell: xlsx.CellObject) : string {
 
 function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.WorkSheet): utils.SheetDataTable|undefined {
 	if (worksheet['!ref'] == undefined) {
-		utils.logger(true, `- Pass Sheet "${sheetName}" : Sheet is empty`);
+		utils.debug(`- Pass Sheet "${sheetName}" : Sheet is empty`);
 		return;
 	}
 	if (utils.NullStr(sheetName) || sheetName[0] == "!") {
-		utils.logger(true, `- Pass Sheet "${sheetName}" : Sheet Name start with "!"`);
+		utils.debug(`- Pass Sheet "${sheetName}" : Sheet Name start with "!"`);
 		return;
 	}
 
@@ -206,63 +269,65 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 	return DataTable;
 }
 
-async function HandleExcelFile(fileName: string) {
-	const extname = path.extname(fileName);
-	if (extname != '.xls' && extname != '.xlsx') {
-		return;
-	}
-	if (path.basename(fileName)[0] == '!') {
-		utils.logger(true, `- Pass File "${fileName}"`);
-		return;
-	}
-	if (path.basename(fileName).indexOf(`~$`) == 0) {
-		utils.logger(true, `- Pass File "${fileName}"`);
-		return;
-	}
-	let opt:xlsx.ParsingOptions = {
-		type: "buffer",
-		// codepage: 0,//If specified, use code page when appropriate **
-		cellFormula: false,//Save formulae to the .f field
-		cellHTML: false,//Parse rich text and save HTML to the .h field
-		cellText: true,//Generated formatted text to the .w field
-		cellDates: true,//Store dates as type d (default is n)
-		cellStyles: true,//Store style/theme info to the .s field
-		/**
-		* If specified, use the string for date code 14 **
-		 * https://github.com/SheetJS/js-xlsx#parsing-options
-		 *		Format 14 (m/d/yy) is localized by Excel: even though the file specifies that number format,
-		 *		it will be drawn differently based on system settings. It makes sense when the producer and
-		 *		consumer of files are in the same locale, but that is not always the case over the Internet.
-		 *		To get around this ambiguity, parse functions accept the dateNF option to override the interpretation of that specific format string.
-		 */
-		dateNF: 'yyyy/mm/dd',
-		WTF: true,//If true, throw errors on unexpected file features **
-	};
-	const filebuffer = await fs.readFileAsync(fileName);
-	const excel = xlsx.read(filebuffer, opt);
-	if (excel == null) {
-		utils.exception(`excel ${utils.yellow_ul(fileName)} open failure.`);
-	}
-	if (excel.Sheets == null) {
-		return;
-	}
-	for (let sheetName of excel.SheetNames) {
-		utils.logger(true, `- Handle excel "${utils.brightWhite(fileName)}" Sheet "${utils.yellow_ul(sheetName)}"`);
-		const worksheet = excel.Sheets[sheetName];
-		const datatable = HandleWorkSheet(fileName, sheetName, worksheet);
-		if (datatable) {
-			const oldDataTable = utils.ExportExcelDataMap.get(datatable.name);
-			if (oldDataTable) {
-				utils.exception(`found duplicate file name : ${utils.yellow_ul(datatable.name)} \n`
-								+ `at excel ${utils.yellow_ul(fileName)} \n`
-								+ `and excel ${utils.yellow_ul(oldDataTable.filename)}`);
-			}
-			utils.ExportExcelDataMap.set(datatable.name, datatable);
-			for (const handler of gExportWrapperLst) {
-				await handler.ExportTo(datatable, gCfg);
+async function HandleExcelFile(fileName: string): Promise<boolean> {
+	try {
+		const extname = path.extname(fileName);
+		if (extname != '.xls' && extname != '.xlsx') {
+			return false;
+		}
+		if (path.basename(fileName)[0] == '!') {
+			utils.debug(`- Pass File "${fileName}"`);
+			return false;
+		}
+		if (path.basename(fileName).indexOf(`~$`) == 0) {
+			utils.debug(`- Pass File "${fileName}"`);
+			return false;
+		}
+		let opt:xlsx.ParsingOptions = {
+			type: "buffer",
+			// codepage: 0,//If specified, use code page when appropriate **
+			cellFormula: false,//Save formulae to the .f field
+			cellHTML: false,//Parse rich text and save HTML to the .h field
+			cellText: true,//Generated formatted text to the .w field
+			cellDates: true,//Store dates as type d (default is n)
+			cellStyles: true,//Store style/theme info to the .s field
+			/**
+			* If specified, use the string for date code 14 **
+			 * https://github.com/SheetJS/js-xlsx#parsing-options
+			 *		Format 14 (m/d/yy) is localized by Excel: even though the file specifies that number format,
+			 *		it will be drawn differently based on system settings. It makes sense when the producer and
+			 *		consumer of files are in the same locale, but that is not always the case over the Internet.
+			 *		To get around this ambiguity, parse functions accept the dateNF option to override the interpretation of that specific format string.
+			 */
+			dateNF: 'yyyy/mm/dd',
+			WTF: true,//If true, throw errors on unexpected file features **
+		};
+		const filebuffer = await fs.readFileAsync(fileName);
+		const excel = xlsx.read(filebuffer, opt);
+		if (excel == null) {
+			utils.exception(`excel ${utils.yellow_ul(fileName)} open failure.`);
+		}
+		if (excel.Sheets == null) {
+			return false;
+		}
+		for (let sheetName of excel.SheetNames) {
+			utils.debug(`- Handle excel "${utils.brightWhite(fileName)}" Sheet "${utils.yellow_ul(sheetName)}"`);
+			const worksheet = excel.Sheets[sheetName];
+			const datatable = HandleWorkSheet(fileName, sheetName, worksheet);
+			if (datatable) {
+				const oldDataTable = utils.ExportExcelDataMap.get(datatable.name);
+				if (oldDataTable) {
+					utils.exception(`found duplicate file name : ${utils.yellow_ul(datatable.name)} \n`
+									+ `at excel ${utils.yellow_ul(fileName)} \n`
+									+ `and excel ${utils.yellow_ul(oldDataTable.filename)}`);
+				}
+				utils.ExportExcelDataMap.set(datatable.name, datatable);
 			}
 		}
+	} catch(ex) {
+		return false;
 	}
+	return true;
 }
 
 function InitEnv(): boolean {

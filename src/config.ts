@@ -6,6 +6,10 @@ import ConfTpl from "./config_tpl.json";
 
 // Work Root Dir
 export const gRootDir = process.cwd();
+export const gGlobalIgnoreDirName = new Set([
+	".svn",
+	".git"
+]);
 
 // Global Export Config
 export let gCfg: typeof ConfTpl = ConfTpl; // default config

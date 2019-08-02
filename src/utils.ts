@@ -21,17 +21,18 @@ export const brightWhite = chalk.default.whiteBright.bold
 //#region Logger
 export let EnableDebugOutput: boolean = true;
 export function SetEnableDebugOutput(b: boolean) { EnableDebugOutput = b; }
-export function logger(debugMode: boolean, ...args: any[]) {
-	if (!EnableDebugOutput && debugMode) {
-		return;
-	}
+export function logger(...args: any[]) {
 	console.log(...args);
+}
+export function debug(...args: any[]) {
+	if (!EnableDebugOutput) return;
+	logger(...args);
 }
 let ExceptionLog = '';
 export function exception(txt: string, ex?:any): never {
 	const LOG_CTX = `${red(`+ [ERROR] `)} ${txt}\n${red(ex?ex:'')}\n`;
 	ExceptionLog += LOG_CTX;
-	logger(false, LOG_CTX);
+	logger(LOG_CTX);
 	throw txt;
 }
 //#endregion
@@ -76,19 +77,45 @@ export module TimeUsed
 			BeforeExistHandler();
 		}
 		const color = HasException ? red : green;
-		logger(false, color(`----------------------------------------`));
-		logger(false, color(`-          ${HasException?'Got Exception !!!':'    Well Done    '}           -`));
-		logger(false, color(`----------------------------------------`));
-		logger(false, `Total Use Tick : "${yellow_ul(TotalElapse())}"`);
+		logger(color(`----------------------------------------`));
+		logger(color(`-          ${HasException?'Got Exception !!!':'    Well Done    '}           -`));
+		logger(color(`----------------------------------------`));
+		logger(`Total Use Tick : "${yellow_ul(TotalElapse())}"`);
 
 		if (HasException) {
-			logger(false, red("Exception Logs:"));
-			logger(false, ExceptionLog);
+			logger(red("Exception Logs:"));
+			logger(ExceptionLog);
 			process.exit(-1);
 		} else {
 			process.exit(0);
 		}
 	});
+}
+//#endregion
+
+////////////////////////////////////////////////////////////////////////////////
+//#region async Worker Monitor
+export class AsyncWorkMonitor
+{
+	public addWork(cnt: number = 1) {
+		this._leftCnt += cnt;
+	}
+	public decWork(cnt: number = 1) {
+		this._leftCnt -= cnt;
+	}
+	public async WaitAllWorkDone(): Promise<boolean> {
+		if (this._leftCnt <= 0) return true;
+		while (true) {
+			if (this._leftCnt <= 0) {
+				return true;
+			}
+			await this.delay(0.01)
+		}
+	}
+	public async delay(ms: number) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+	private _leftCnt = 0;
 }
 //#endregion
 
@@ -113,14 +140,42 @@ export type SheetHeader = {
 	color: string; // group
 }
 export class SheetDataTable {
-	constructor(name: string, filename: string) {
+	public constructor(name: string, filename: string) {
 		this.name = name;
 		this.filename = filename;
+	}
+	// check sheet column contains key
+	public checkColumnContainsValue(columnName: string, value: any): boolean {
+		if (!this.columnKeysMap.has(columnName)) {
+			if (!this.makeColumnKeyMap(columnName)) {
+				exception(`CALL [checkColumnContainsValue] failure: sheet column name ${yellow_ul(this.name + '.' + columnName)}`);
+				return false;
+			}
+			let s = this.columnKeysMap.get(columnName);
+			return s != undefined && s.has(value);
+		}
+		return true;
 	}
 	public name: string;
 	public filename: string;
 	public arrTypeHeader = new Array<SheetHeader>();
 	public arrValues = new Array<SheetRow>();
+
+	private makeColumnKeyMap(columnName: string): boolean {
+		for (let i = 0; i < this.arrTypeHeader.length; ++i) {
+			if (this.arrTypeHeader[i].name == columnName) {
+				const s = new Set<any>();
+				for (const row of this.arrValues) {
+					if (row.type != ESheetRowType.data) continue;
+					s.add(row.values);
+				}
+				this.columnKeysMap.set(columnName, s);
+				return true;
+			}
+		}
+		return false;
+	}
+	private columnKeysMap = new Map<string, Set<any> >();
 }
 // all export data here
 export const ExportExcelDataMap = new Map<string, SheetDataTable>();
@@ -188,7 +243,7 @@ export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<S
 			}
 		}
 		if (!found) {
-			logger(false, `Filter Name ${yellow_ul(ele)} Not foud In ${yellow_ul('ColorToGroupMap')}. Ignore It!`);
+			logger(`Filter Name ${yellow_ul(ele)} Not foud In ${yellow_ul('ColorToGroupMap')}. Ignore It!`);
 		}
 	}
 	// filter
