@@ -59,6 +59,7 @@ class CSVExport extends utils.IExportWrapper {
 			return true;
 		}
 		for (let row of dt.arrValues) {
+			if (row.type != utils.ESheetRowType.data && row.type != utils.ESheetRowType.header) continue;
 			arrTmp.push(ParseCSVLine(arrExportHeader, row, cfg, this._exportCfg));
 		}
 		const csvcontent = arrTmp.join(utils.LineBreaker) + utils.LineBreaker;

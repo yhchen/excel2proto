@@ -21,9 +21,9 @@
     "@types/fs-extra-promise": "^1.0.7",
     "@types/lodash": "^4.14.122",
     "@types/moment": "^2.13.0",
-    "@types/node": "^11.10.5",
+    "@types/node": "^12.6.9",
     "@types/xlsx": "0.0.36",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.5.3"
   },
   "repository": {
     "type": "git",

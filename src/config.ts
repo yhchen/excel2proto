@@ -33,7 +33,6 @@ export function InitGlobalConfig(fpath: string = ''): boolean {
 			return false;
 		}
 	}
-	utils.SetEnableDebugOutput(gCfg.EnableDebugOutput);
 	utils.SetLineBreaker(gCfg.LineBreak);
 
 	CTypeParser.DateFmt = gCfg.DateFmt;

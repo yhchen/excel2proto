@@ -1,14 +1,13 @@
 import * as path from 'path';
 import * as fs from 'fs-extra-promise';
-import * as xlsx from 'xlsx';
 import * as utils from './utils';
-import {ETypeNames, CTypeParser} from './CTypeParser';
 
 ////////////////////////////////////////////////////////////////////////////////
 //#region Export Wrapper
 
 import {gCfg, gRootDir, gGlobalIgnoreDirName} from './config'
-import { isFunction } from 'util';
+import { HandleExcelFile } from './excel_utils'
+import { CHightTypeChecker } from './CHighTypeChecker';
 const gExportWrapperLst = new Array<utils.IExportWrapper>();
 for (const exportCfg of gCfg.Export) {
 	const Constructor = utils.ExportWrapperMap.get(exportCfg.type);
@@ -31,19 +30,16 @@ for (const exportCfg of gCfg.Export) {
 
 export async function execute() : Promise<boolean> {
 	if (!InitEnv()) {
-		utils.exception(`Init Env Failure!`);
+		throw `Init Env Failure!`;
 	}
 	if (!await HandleReadData()) {
-		utils.exception(`handle read excel data failure.`);
-		return false;
+		throw `handle read excel data failure.`;
 	}
 	if (!HandleHighLevelTypeCheck()) {
-		utils.exception(`handle check hight level type failure.`);
-		return false;
+		throw `handle check hight level type failure.`;
 	}
 	if (!await HandleExportAll()) {
-		utils.exception(`handle export failure.`);
-		return false;
+		throw `handle export failure.`;
 	}
 	return true;
 }
@@ -94,26 +90,49 @@ async function HandleReadData(): Promise<boolean> {
 	}
 	await WorkerMonitor.delay(1000);
 	await WorkerMonitor.WaitAllWorkDone();
+	utils.logger(`${utils.green('[SUCCESS]')} READ ALL SHEET DONE. Total Use Tick : ${utils.green(utils.TimeUsed.LastElapse())}`);
 	return true;
 }
 
 function HandleHighLevelTypeCheck(): boolean {
-	// const type_checker = require('./type_extens_checker').checker;
-	// // convert enum (key -> value) to (value -> key)
-	// for (let key in type_checker) {
-	// 	const node = type_checker[key];
-	// 	if(isFunction(node)) continue; // skip function
-	// 	let newNode: any = {};
-	// 	for (let kv of node) {
-	// 		newNode[kv[1]] = kv[0];
-	// 	}
-	// 	type_checker['_inn_R' + key] = newNode;
-	// }
+	if (!gCfg.EnableTypeCheck) {
+		return true;
+	}
 	let foundError = false;
 	for (const kv of utils.ExportExcelDataMap) {
 		const database = kv[1];
-		// FIXME : add code here
+		for (let colIdx = 0; colIdx < database.arrTypeHeader.length; ++colIdx) {
+			let header = database.arrTypeHeader[colIdx];
+			if (!header.highCheck) continue;
+			try {
+				header.highCheck.init();
+			} catch (ex) {
+				utils.exception(`Excel "${utils.yellow_ul(database.filename)}" Sheet "${utils.yellow_ul(database.name)}" High Type`
+					+ ` "${utils.yellow_ul(header.name)}" format error "${utils.yellow_ul(header.highCheck.s)}"!`);
+			}
+			for (let rowIdx = 0; rowIdx < database.arrValues.length; ++rowIdx) {
+				const row = database.arrValues[rowIdx];
+				if (row.type != utils.ESheetRowType.data) continue;
+				const data = row.values[colIdx];
+
+				if (!data) continue;
+				try {
+					if (!header.highCheck.checkType(data)) {
+						throw '';
+					}
+				} catch (ex) {
+					foundError = true;
+					// header.highCheck.checkType(data); // for debug
+					utils.exceptionRecord(`Excel "${utils.yellow_ul(database.filename)}" `
+						+ `Sheet Row "${utils.yellow_ul(database.name+'.'+utils.yellow_ul(header.name))}" High Type format error`
+						+ `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(header.cIdx)+(row.cIdx+1).toString())}" `
+						+ ` "${utils.yellow_ul(data)}"!`, ex);
+				}
+			}
+		}
 	}
+	utils.logger(`${foundError ? utils.red('[FAILURE]') : utils.green('[SUCCESS]')} `
+				+ `CHECK ALL HIGH TYPE DONE. Total Use Tick : ${utils.green(utils.TimeUsed.LastElapse())}`);
 	return !foundError;
 }
 
@@ -124,208 +143,6 @@ async function HandleExportAll() : Promise<boolean> {
 				return false;
 			}
 		}
-	}
-	return true;
-}
-
-function GetCellData(worksheet: xlsx.WorkSheet, c: number, r: number): xlsx.CellObject|undefined {
-	const cell = xlsx.utils.encode_cell({c, r});
-	return worksheet[cell];
-}
-
-// get cell front groud color
-function GetCellFrontGroudColor(cell: xlsx.CellObject) : string {
-	if (!cell.s || !cell.s.fgColor || !cell.s.fgColor.rgb) return '000000'; // default return white
-	return cell.s.fgColor.rgb;
-}
-
-function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.WorkSheet): utils.SheetDataTable|undefined {
-	if (worksheet['!ref'] == undefined) {
-		utils.debug(`- Pass Sheet "${sheetName}" : Sheet is empty`);
-		return;
-	}
-	if (utils.NullStr(sheetName) || sheetName[0] == "!") {
-		utils.debug(`- Pass Sheet "${sheetName}" : Sheet Name start with "!"`);
-		return;
-	}
-
-	const Range = xlsx.utils.decode_range(<string>worksheet['!ref']);
-	const ColumnMax = Range.e.c;
-	const RowMax = Range.e.r;
-	const arrHeaderName = new Array<{cIdx:number, name:string, parser:CTypeParser, color:string}>();
-	// find max column and rows
-	let rIdx = 0;
-	const DataTable = new utils.SheetDataTable(sheetName, fileName);
-	// find column name
-	for (; rIdx <= RowMax; ++rIdx) {
-		const firstCell = GetCellData(worksheet, 0, rIdx);
-		if (firstCell == undefined || firstCell.w == undefined || utils.NullStr(firstCell.w)) {
-			continue;
-		}
-		if (firstCell.w[0] == '#') {
-			continue;
-		}
-		const tmpArry = [];
-		for (let cIdx = 0; cIdx <= ColumnMax; ++cIdx) {
-			const cell = GetCellData(worksheet, cIdx, rIdx);
-			if (cell == undefined || cell.w == undefined || utils.NullStr(cell.w) || cell.w[0] == '#') {
-				continue;
-			}
-			const colGrp = GetCellFrontGroudColor(cell);
-			const NamedGrp = (<any>gCfg.ColorToGroupMap)[colGrp];
-			if (NamedGrp == undefined) {
-				utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" `
-							  + `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(cIdx)+(rIdx).toString())}" `
-							  + `Name Group ${utils.yellow_ul(colGrp)} Invalid"!`);
-			}
-			arrHeaderName.push({cIdx, name:cell.w, parser:new CTypeParser(ETypeNames.string), color:colGrp});
-			tmpArry.push(cell.w);
-		}
-		DataTable.arrValues.push({type:utils.ESheetRowType.header, values: tmpArry});
-		++rIdx;
-		break;
-	}
-	// find type
-	for (; rIdx <= RowMax; ++rIdx) {
-		const firstCell = GetCellData(worksheet, arrHeaderName[0].cIdx, rIdx);
-		if (firstCell == undefined || firstCell.w == undefined || utils.NullStr(firstCell.w)) {
-			continue;
-		}
-		if (firstCell.w[0] == '#') {
-			continue;
-		}
-
-		if (firstCell.w[0] != '*') {
-			utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" Sheet Type Row not found!`);
-		}
-		firstCell.w = firstCell.w.substr(1); // skip '*'
-		const tmpArry = [];
-		let typeHeader = new Array<utils.SheetHeader>();
-		for (const col of arrHeaderName) {
-			const cell = GetCellData(worksheet, col.cIdx, rIdx);
-			if (cell == undefined || cell.w == undefined) {
-				utils.exception(`Excel "${utils.yellow_ul(fileName)}" ` +
-								`Sheet "${utils.yellow_ul(sheetName)}"  Type Row "${utils.yellow_ul(col.name)}" not found!`);
-				return;
-			}
-			try {
-				col.parser = new CTypeParser(cell.w);
-				tmpArry.push(cell.w);
-				typeHeader.push({name:col.name, typeChecker:col.parser, stype:cell.w, comment:false, color:col.color});
-			} catch (ex) {
-				// new CTypeParser(cell.w); // for debug used
-				utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" Sheet Type Row`
-						+ ` "${utils.yellow_ul(col.name)}" format error "${utils.yellow_ul(cell.w)}"!`, ex);
-			}
-		}
-		DataTable.arrTypeHeader = typeHeader;
-		DataTable.arrValues.push({type:utils.ESheetRowType.type, values: tmpArry});
-		++rIdx;
-		break;
-	}
-
-	// handle datas
-	for (; rIdx <= RowMax; ++rIdx) {
-		let firstCol = true;
-		const tmpArry = [];
-		for (let col of arrHeaderName) {
-			const cell = GetCellData(worksheet, col.cIdx, rIdx);
-			if (firstCol) {
-				if (cell == undefined || cell.w == undefined || utils.NullStr(cell.w)) {
-					break;
-				}
-				else if (cell.w[0] == '#') {
-					break;
-				}
-				firstCol = false;
-			}
-			const value = cell && cell.w ? cell.w : '';
-			let colObj;
-			try {
-				colObj = col.parser.ParseContent(cell);
-				tmpArry.push(colObj);
-			} catch (ex) {
-				// col.checker.ParseDataStr(cell);
-				utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" `
-							  + `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(col.cIdx)+(rIdx).toString())}" `
-							  + `Parse Data "${utils.yellow_ul(value)}" With ${utils.yellow_ul(col.parser.s)} `
-							  + `Cause utils.exception "${utils.red(ex)}"!`);
-				return;
-			}
-			if (gCfg.EnableTypeCheck) {
-				if (!col.parser.CheckContentVaild(colObj)) {
-					col.parser.CheckContentVaild(colObj); // for debug used
-					utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" `
-								  + `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(col.cIdx)+(rIdx).toString())}" `
-								  + `format not match "${utils.yellow_ul(value)}" with ${utils.yellow_ul(col.parser.s)}!`);
-					return;
-				}
-			}
-		}
-		if (!firstCol) {
-			DataTable.arrValues.push({type:utils.ESheetRowType.data, values: tmpArry});
-		}
-	}
-	return DataTable;
-}
-
-async function HandleExcelFile(fileName: string): Promise<boolean> {
-	try {
-		const extname = path.extname(fileName);
-		if (extname != '.xls' && extname != '.xlsx') {
-			return false;
-		}
-		if (path.basename(fileName)[0] == '!') {
-			utils.debug(`- Pass File "${fileName}"`);
-			return false;
-		}
-		if (path.basename(fileName).indexOf(`~$`) == 0) {
-			utils.debug(`- Pass File "${fileName}"`);
-			return false;
-		}
-		let opt:xlsx.ParsingOptions = {
-			type: "buffer",
-			// codepage: 0,//If specified, use code page when appropriate **
-			cellFormula: false,//Save formulae to the .f field
-			cellHTML: false,//Parse rich text and save HTML to the .h field
-			cellText: true,//Generated formatted text to the .w field
-			cellDates: true,//Store dates as type d (default is n)
-			cellStyles: true,//Store style/theme info to the .s field
-			/**
-			* If specified, use the string for date code 14 **
-			 * https://github.com/SheetJS/js-xlsx#parsing-options
-			 *		Format 14 (m/d/yy) is localized by Excel: even though the file specifies that number format,
-			 *		it will be drawn differently based on system settings. It makes sense when the producer and
-			 *		consumer of files are in the same locale, but that is not always the case over the Internet.
-			 *		To get around this ambiguity, parse functions accept the dateNF option to override the interpretation of that specific format string.
-			 */
-			dateNF: 'yyyy/mm/dd',
-			WTF: true,//If true, throw errors on unexpected file features **
-		};
-		const filebuffer = await fs.readFileAsync(fileName);
-		const excel = xlsx.read(filebuffer, opt);
-		if (excel == null) {
-			utils.exception(`excel ${utils.yellow_ul(fileName)} open failure.`);
-		}
-		if (excel.Sheets == null) {
-			return false;
-		}
-		for (let sheetName of excel.SheetNames) {
-			utils.debug(`- Handle excel "${utils.brightWhite(fileName)}" Sheet "${utils.yellow_ul(sheetName)}"`);
-			const worksheet = excel.Sheets[sheetName];
-			const datatable = HandleWorkSheet(fileName, sheetName, worksheet);
-			if (datatable) {
-				const oldDataTable = utils.ExportExcelDataMap.get(datatable.name);
-				if (oldDataTable) {
-					utils.exception(`found duplicate file name : ${utils.yellow_ul(datatable.name)} \n`
-									+ `at excel ${utils.yellow_ul(fileName)} \n`
-									+ `and excel ${utils.yellow_ul(oldDataTable.filename)}`);
-				}
-				utils.ExportExcelDataMap.set(datatable.name, datatable);
-			}
-		}
-	} catch(ex) {
-		return false;
 	}
 	return true;
 }

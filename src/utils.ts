@@ -1,15 +1,14 @@
+import * as fs from 'fs-extra';
 export { isString, isNumber, isArray, isObject, isBoolean } from 'lodash';
 export { isDate } from 'moment';
 import { isString } from 'util';
-import * as fs from 'fs-extra';
-
 import { gCfg } from './config';
-
+import { CTypeParser } from './CTypeParser';
+import { CHightTypeChecker } from './CHighTypeChecker';
 
 ////////////////////////////////////////////////////////////////////////////////
 //#region console color
 import * as chalk from 'chalk';
-import { CTypeParser } from './CTypeParser';
 export const yellow_ul = chalk.default.yellow.underline;	//yellow under line
 export const yellow = chalk.default.yellow;
 export const red = chalk.default.redBright;
@@ -19,21 +18,23 @@ export const brightWhite = chalk.default.whiteBright.bold
 
 ////////////////////////////////////////////////////////////////////////////////
 //#region Logger
-export let EnableDebugOutput: boolean = true;
-export function SetEnableDebugOutput(b: boolean) { EnableDebugOutput = b; }
 export function logger(...args: any[]) {
 	console.log(...args);
 }
 export function debug(...args: any[]) {
-	if (!EnableDebugOutput) return;
+	if (!gCfg.EnableDebugOutput) return;
 	logger(...args);
 }
 let ExceptionLog = '';
 export function exception(txt: string, ex?:any): never {
+	exceptionRecord(txt, ex);
+	throw txt;
+}
+// record exception not throw.
+export function exceptionRecord(txt: string, ex?:any): void {
 	const LOG_CTX = `${red(`+ [ERROR] `)} ${txt}\n${red(ex?ex:'')}\n`;
 	ExceptionLog += LOG_CTX;
 	logger(LOG_CTX);
-	throw txt;
 }
 //#endregion
 
@@ -123,21 +124,24 @@ export class AsyncWorkMonitor
 //#region Datas 
 // excel gen data table
 export enum ESheetRowType {
-	header = 1,
-	type = 2,
-	data = 3,
-	comment = 4,
+	header = 1, // name row
+	type = 2, // type
+	data = 3, // data
+	comment = 4, // comment
 }
 export type SheetRow = {
 	type: ESheetRowType,
 	values: Array<any>,
+	cIdx: number;
 }
 export type SheetHeader = {
 	name: string, // name
 	stype: string, // type string
+	cIdx: number, // header idx
 	typeChecker: CTypeParser, // type checker
 	comment: boolean; // is comment line?
 	color: string; // group
+	highCheck?: CHightTypeChecker;
 }
 export class SheetDataTable {
 	public constructor(name: string, filename: string) {
@@ -151,10 +155,15 @@ export class SheetDataTable {
 				exception(`CALL [checkColumnContainsValue] failure: sheet column name ${yellow_ul(this.name + '.' + columnName)}`);
 				return false;
 			}
-			let s = this.columnKeysMap.get(columnName);
-			return s != undefined && s.has(value);
 		}
-		return true;
+		let s = this.columnKeysMap.get(columnName);
+		return s != undefined && s.has(value);
+	}
+	public containsColumName(name: string): boolean {
+		for (const header of this.arrTypeHeader) {
+			if (header.name == name) return true;
+		}
+		return false;
 	}
 	public name: string;
 	public filename: string;
@@ -167,7 +176,7 @@ export class SheetDataTable {
 				const s = new Set<any>();
 				for (const row of this.arrValues) {
 					if (row.type != ESheetRowType.data) continue;
-					s.add(row.values);
+					s.add(row.values[i]);
 				}
 				this.columnKeysMap.set(columnName, s);
 				return true;

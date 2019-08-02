@@ -37,7 +37,7 @@
  *      | vector3           | float[3]                                              |
  *      -----------------------------------------------------------------------------
  */
-import { isArray, isObject, isNumber, isString, isDate } from 'lodash';
+import { isArray, isNumber, isString, isDate } from 'lodash';
 import * as moment from 'moment';
 
 function NullStr(s: string) {
@@ -384,6 +384,9 @@ function _ParseNumber(n: number|string, type: CType): number {
 		// if (num < 1) {
 		// 	return num.toString().replace(/0\./g, '.');
 		// }
+		if (isNaN(num)) {
+			throw `number type error!`;
+		}
 		return num;
 	}
 	if (type.typename == ETypeNames.double || type.typename == ETypeNames.float) {
