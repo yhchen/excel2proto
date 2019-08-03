@@ -7,6 +7,7 @@
         "FF0000" : "RED",
         "00B050" : "GREEN",
         "000000" : "WHITE",
+        "FFFFFF" : "BLACK",
         "*" : "ALL"
     },
     "Export": [
