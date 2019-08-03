@@ -3,8 +3,9 @@ import * as fs from "fs-extra-promise";
 import * as utils from "../utils";
 
 function ParseJSLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow,
-					 rootNode: any, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg): string|undefined {
-	if (sheetRow.type != utils.ESheetRowType.data) return undefined;
+	rootNode: any, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg): string | undefined {
+	if (sheetRow.type != utils.ESheetRowType.data)
+		return undefined;
 	let item: any = {};
 	for (let i = 0; i < header.length && i < sheetRow.values.length; ++i) {
 		if (!header[i] || header[i].comment) continue;
@@ -28,7 +29,7 @@ function DumpToString(data: any) {
 		let s = '';
 		for (let i = 0; i < data.length; ++i) {
 			if (data[i] === undefined) continue;
-			s += (s.length===0?'':',') + DumpToString(data[i]);
+			s += (s.length === 0 ? '' : ',') + DumpToString(data[i]);
 		}
 		return `[${s}]`;
 	} else if (utils.isObject(data)) {
@@ -36,7 +37,7 @@ function DumpToString(data: any) {
 		for (let name in data) {
 			const v = (<any>data)[name];
 			if (v === undefined) continue;
-			s += `${s.length===0?'':','}${name}:${DumpToString(v)}`;
+			s += `${s.length === 0 ? '' : ','}${name}:${DumpToString(v)}`;
 		}
 		return `{${s}}`;
 	} else if (utils.isBoolean(data)) {
@@ -70,7 +71,7 @@ class JSExport extends utils.IExportWrapper {
 				return false;
 			}
 
-			let FMT: string|undefined = this._exportCfg.ExportTemple;
+			let FMT: string | undefined = this._exportCfg.ExportTemple;
 			if (FMT == undefined) {
 				utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
 				return false;
@@ -83,11 +84,11 @@ class JSExport extends utils.IExportWrapper {
 				utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not found Keyword ${utils.yellow_ul("{name}")}!`);
 				return false;
 			}
-			const jscontent = FMT.replace("{name}", dt.name).replace("{data}", DumpToString(jsObj)||"{}");
-			const outfile = path.join(outdir, dt.name+this._exportCfg.ExtName);
-			await fs.writeFileAsync(outfile, jscontent, {encoding:'utf8', flag:'w+'});
+			const jscontent = FMT.replace("{name}", dt.name).replace("{data}", DumpToString(jsObj) || "{}");
+			const outfile = path.join(outdir, dt.name + this._exportCfg.ExtName);
+			await fs.writeFileAsync(outfile, jscontent, { encoding: 'utf8', flag: 'w+' });
 			utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
-							 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+				+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 		}
 		return true;
 	}
@@ -100,7 +101,7 @@ class JSExport extends utils.IExportWrapper {
 			utils.exception(`create output path "${utils.yellow_ul(path.dirname(outdir))}" failure!`);
 			return false;
 		}
-		let FMT: string|undefined = this._exportCfg.ExportTemple;
+		let FMT: string | undefined = this._exportCfg.ExportTemple;
 		if (FMT == undefined) {
 			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
 			return false;
@@ -110,13 +111,13 @@ class JSExport extends utils.IExportWrapper {
 			return false;
 		}
 		const jscontent = FMT.replace("{data}", DumpToString(this._globalObj));
-		await fs.writeFileAsync(outdir, jscontent, {encoding:'utf8', flag:'w+'});
+		await fs.writeFileAsync(outdir, jscontent, { encoding: 'utf8', flag: 'w+' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
-						 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 		return true;
 	}
 
 	private _globalObj: any = {};
 }
 
-module.exports = function(exportCfg: utils.ExportCfg):utils.IExportWrapper { return new JSExport(exportCfg); };
+module.exports = function (exportCfg: utils.ExportCfg): utils.IExportWrapper { return new JSExport(exportCfg); };

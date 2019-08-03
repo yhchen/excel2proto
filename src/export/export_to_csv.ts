@@ -63,14 +63,14 @@ class CSVExport extends utils.IExportWrapper {
 			arrTmp.push(ParseCSVLine(arrExportHeader, row, cfg, this._exportCfg));
 		}
 		const csvcontent = arrTmp.join(utils.LineBreaker) + utils.LineBreaker;
-		await fs.writeFileAsync(path.join(outdir, dt.name+this._exportCfg.ExtName), csvcontent, {encoding:'utf8', flag:'w+'});
+		await fs.writeFileAsync(path.join(outdir, dt.name + this._exportCfg.ExtName), csvcontent, { encoding: 'utf8', flag: 'w+' });
 
-		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(path.join(outdir, dt.name+this._exportCfg.ExtName))}". `
-							+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(path.join(outdir, dt.name + this._exportCfg.ExtName))}". `
+			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 
 		return true;
 	}
 	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> { return true; }
 }
 
-module.exports = function(exportCfg: utils.ExportCfg):utils.IExportWrapper { return new CSVExport(exportCfg); };
+module.exports = function (exportCfg: utils.ExportCfg): utils.IExportWrapper { return new CSVExport(exportCfg); };

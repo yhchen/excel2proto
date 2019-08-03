@@ -10,7 +10,7 @@ function InitEnv() {
 	// convert enum (key -> value) to (value -> key)
 	for (let key in type_enums) {
 		const node = type_enums[key];
-		if(isFunction(node)) continue; // skip function
+		if (isFunction(node)) continue; // skip function
 		let newNode: any = {};
 		for (let k in node) {
 			newNode[node[k]] = k;
@@ -56,14 +56,16 @@ class CTypeGenerator {
 		};
 	}
 	public setLstMode(v: boolean) {
-		if (this._lstMode == v) return;
+		if (this._lstMode == v)
+			return;
 		this._lstMode = v;
 		if (!this._lstMode) {
 			const lst = this._lst;
 			this._lst = []
 			this._func = (value: any): boolean => {
 				for (let i = 0; i < lst.length; ++i) {
-					if (!lst[i](value[i])) return false;
+					if (!lst[i](value[i]))
+						return false;
 				}
 				return true;
 			}
@@ -98,7 +100,7 @@ export class CHightTypeChecker {
 		for (let i = idx; i < s.length; ++i) {
 			const c = s[i];
 			if (c == '[') {
-				if (i + 1 < s.length && s[i+1] == ']') {
+				if (i + 1 < s.length && s[i + 1] == ']') {
 					++i;
 					generator.addArray();
 				} else {

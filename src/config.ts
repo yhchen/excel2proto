@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra-promise';
 import * as utils from './utils'
-import {CTypeParser} from './CTypeParser';
+import { CTypeParser } from './CTypeParser';
 
 import ConfTpl from "./config_tpl.json";
 
@@ -17,7 +17,7 @@ export let gCfg: typeof ConfTpl = ConfTpl; // default config
 export function InitGlobalConfig(fpath: string = ''): boolean {
 	if (fpath != '') {
 		gCfg = JSON.parse(<string>fs.readFileSync(fpath, { encoding: 'utf8' }));
-		function check(gCfg: any, ConfTpl: any): boolean{
+		function check(gCfg: any, ConfTpl: any): boolean {
 			for (let key in ConfTpl) {
 				if (ConfTpl[key] != null && typeof gCfg[key] !== typeof ConfTpl[key]) {
 					utils.exception(utils.red(`configure format error. key "${utils.yellow(key)}" not found!`));

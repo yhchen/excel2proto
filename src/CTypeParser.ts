@@ -53,42 +53,45 @@ function VaildNumber(s: string): boolean {
 
 const WORDSCHAR = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
 const NUMCHAR = '0123456789';
-function FindWord(s: string, idx?: number): {start:number, end:number, len:number}|undefined {
+function FindWord(s: string, idx?: number): { start: number, end: number, len: number } | undefined {
 	let first = true;
-	let start = 0, end = s.length-1;
-	for (let i = idx?idx:0; i < s.length; ++i) {
+	let start = 0, end = s.length - 1;
+	for (let i = idx ? idx : 0; i < s.length; ++i) {
 		if (first) {
-			if (s[i] == ' ' || s[i] == '	') continue;
-			if (WORDSCHAR.indexOf(s[i]) < 0) return undefined;
+			if (s[i] == ' ' || s[i] == '	')
+				continue;
+			if (WORDSCHAR.indexOf(s[i]) < 0)
+				return undefined;
 			first = false;
 			start = i;
 			continue;
 		}
 		if (WORDSCHAR.indexOf(s[i]) < 0) {
-			end = i-1;
+			end = i - 1;
 			break;
 		}
 	}
-	return (end>=start)&&!first?{start,end,len:end-start+1}:undefined;
+	return (end >= start) && !first ? { start, end, len: end - start + 1 } : undefined;
 }
 
-function FindNum(s: string, idx?: number): {start:number, end:number, len:number}|undefined {
+function FindNum(s: string, idx?: number): { start: number, end: number, len: number } | undefined {
 	let first = true;
-	let start = 0, end = s.length-1;
-	for (let i = idx?idx:0; i < s.length; ++i) {
+	let start = 0, end = s.length - 1;
+	for (let i = idx ? idx : 0; i < s.length; ++i) {
 		if (first) {
 			if (s[i] == ' ' || s[i] == '	') continue;
-			if (NUMCHAR.indexOf(s[i]) < 0) return undefined;
+			if (NUMCHAR.indexOf(s[i]) < 0)
+				return undefined;
 			first = false;
 			start = i;
 			continue;
 		}
 		if (NUMCHAR.indexOf(s[i]) < 0) {
-			end = i-1;
+			end = i - 1;
 			break;
 		}
 	}
-	return (end>=start)&&!first?{start,end,len:end-start+1}:undefined;
+	return (end >= start) && !first ? { start, end, len: end - start + 1 } : undefined;
 }
 
 let DateFmt: string = moment.HTML5_FMT.DATETIME_LOCAL_SECONDS;
@@ -114,12 +117,14 @@ const NumberRangeMap = new Map<string, {min:number, max:number}>([
 		['uint',	{ min:0,			max:4294967295 }],
 	]);
 
-const BooleanKeyMap = new Map<string, boolean>([ ['true', true], ['false', false], ['0', false ], ['1', true], ]);
+const BooleanKeyMap = new Map<string, boolean>([['true', true], ['false', false], ['0', false], ['1', true],]);
 
 function CheckNumberInRange(n: number, type: CType): boolean {
-	if (type.typename == undefined) return true;
+	if (type.typename == undefined)
+		return true;
 	const range = NumberRangeMap.get(type.typename);
-	if (range == undefined) return true;
+	if (range == undefined)
+		return true;
 	return n >= range.min && n <= range.max;
 }
 
@@ -150,10 +155,10 @@ const TypeDefaultValue = new Map<ETypeNames|undefined, {w:string, v:any}>([
 ]);
 
 // number type
-const BaseNumberTypeSet = new Set<string>([ ETypeNames.char, ETypeNames.uchar, ETypeNames.short, ETypeNames.ushort, ETypeNames.int,
-											ETypeNames.uint, ETypeNames.int64, ETypeNames.uint64, ETypeNames.double, ETypeNames.float, ]);
+const BaseNumberTypeSet = new Set<string>([ETypeNames.char, ETypeNames.uchar, ETypeNames.short, ETypeNames.ushort, ETypeNames.int,
+ETypeNames.uint, ETypeNames.int64, ETypeNames.uint64, ETypeNames.double, ETypeNames.float,]);
 // date type
-const BaseDateTypeSet = new Set<string>([ ETypeNames.date, ETypeNames.tinydate, ETypeNames.timestamp, ETypeNames.utctime, ]);
+const BaseDateTypeSet = new Set<string>([ETypeNames.date, ETypeNames.tinydate, ETypeNames.timestamp, ETypeNames.utctime,]);
 
 export const enum EType {
 	array,
@@ -161,28 +166,27 @@ export const enum EType {
 	date,
 }
 
-export interface CType
-{
+export interface CType {
 	type: EType;
 	is_number: boolean;
 	typename?: ETypeNames;
 	arr_level?: number; // array level
 	num?: number;
 	next?: CType;
-	obj?: {[name:string]: CType};
+	obj?: { [name: string]: CType };
 }
 
-export class CTypeParser
-{
+export class CTypeParser {
 	public constructor(typeString: string) {
 		this.__s = typeString;
 		let s = typeString.replace(/ /g, '').replace(/\t/g, '').replace(/\n/g, '').replace(/\r/g, '').toLowerCase();
 		if (NullStr(s)) {
-			this._type = {type:EType.base, typename:ETypeNames.string, is_number:false};
+			this._type = { type: EType.base, typename: ETypeNames.string, is_number: false };
 			return;
 		}
-		let tt = _ParseType({s, idx:0});
-		if (tt == undefined) throw `gen type check error: no data`;
+		let tt = _ParseType({ s, idx: 0 });
+		if (tt == undefined)
+			throw `gen type check error: no data`;
 		this._type = tt;
 	}
 
@@ -217,21 +221,24 @@ export class CTypeParser
 	/**
 	 * @description parse content by type
 	 */
-	public ParseContent(value: {w?:string, v?:string|number|boolean|Date}|undefined): any {
-		if (value == undefined || value.w == undefined || NullStr(value.w)) return undefined;
+	public ParseContent(value: { w?: string, v?: string | number | boolean | Date } | undefined): any {
+		if (value == undefined || value.w == undefined || NullStr(value.w))
+			return undefined;
 		switch (this._type.type) {
 			case EType.array:
 				return _Parse(value.w, this._type);
 				// const tmpObj = JSON.parse(value.w);
-				// if (!isArray(tmpObj)) throw `${value} is not a valid json type`;
-				// if (this._type.next == undefined) throw `type array next is undefined`;
+				// if (!isArray(tmpObj))
+				// 	throw `${value} is not a valid json type`;
+				// if (this._type.next == undefined)
+				// 	throw `type array next is undefined`;
 				// for (let i = 0; i < tmpObj.length; ++i) {
 				// 	tmpObj[i] = _Parse(tmpObj[i], this._type.next, 0);
 				// }
 				// return tmpObj;
 			case EType.base:
 				if (this._type.is_number) {
-					return _ParseNumber(<any>value.v||value.w||'', this._type);
+					return _ParseNumber(<any>value.v || value.w || '', this._type);
 				} else if (this._type.typename == ETypeNames.bool) {
 					return BooleanKeyMap.get(value.w.toLowerCase());
 				} else {
@@ -244,38 +251,41 @@ export class CTypeParser
 		}
 	}
 
-	private CheckObjectType(tmpObj:any, type: CType|undefined) : boolean {
-		if (tmpObj == undefined || type == undefined)	return true;
+	private CheckObjectType(tmpObj: any, type: CType | undefined): boolean {
+		if (tmpObj == undefined || type == undefined)
+			return true;
 		switch (type.type) {
-		case EType.array:
-			if (!isArray(tmpObj)) return false;
-			if (type.num !== undefined && type.num != tmpObj.length) return false;
-			for (let i = 0; i < tmpObj.length; ++i) {
-				if (type.next == undefined || !this.CheckObjectType(tmpObj[i], type.next)) {
+			case EType.array:
+				if (!isArray(tmpObj))
 					return false;
+				if (type.num !== undefined && type.num != tmpObj.length)
+					return false;
+				for (let i = 0; i < tmpObj.length; ++i) {
+					if (type.next == undefined || !this.CheckObjectType(tmpObj[i], type.next)) {
+						return false;
+					}
 				}
-			}
-			break;
-		case EType.base:
-			if (type.is_number) {
-				if (isNumber(tmpObj)) {
-					return CheckNumberInRange(tmpObj, type);
+				break;
+			case EType.base:
+				if (type.is_number) {
+					if (isNumber(tmpObj)) {
+						return CheckNumberInRange(tmpObj, type);
+					}
+					else if (isString(tmpObj) && VaildNumber(tmpObj)) {
+						return CheckNumberInRange(+tmpObj, type);
+					}
+					return false;
+				} else if (type.typename == ETypeNames.bool) {
+					return BooleanKeyMap.has(tmpObj.toLowerCase());
 				}
-				else if (isString(tmpObj) && VaildNumber(tmpObj)) {
-					return CheckNumberInRange(+tmpObj, type);
-				}
-				return false;
-			} else if (type.typename == ETypeNames.bool) {
-				return BooleanKeyMap.has(tmpObj.toLowerCase());
-			}
-			return isString(tmpObj);
-		case EType.date:
-			return moment.default(tmpObj, DateFmt).isValid();
+				return isString(tmpObj);
+			case EType.date:
+				return moment.default(tmpObj, DateFmt).isValid();
 		}
 		return true;
 	}
 
-	private _type:CType;
+	private _type: CType;
 	private __s: string;
 }
 
@@ -289,29 +299,33 @@ function _FixArrayLevel(type: CType): number {
 	type.arr_level = 0;
 	return 0;
 }
-function _ParseType(p:{s:string, idx:number}): CType|undefined {
-	let thisNode:CType|undefined = undefined;
+function _ParseType(p: { s: string, idx: number }): CType | undefined {
+	let thisNode: CType | undefined = undefined;
 	// skip write space
 	if (p.idx >= p.s.length) undefined;
 	if (p.s[p.idx] == '[') {
 		++p.idx;
-		let num:number|undefined = undefined;
-		if (p.idx >= p.s.length)	throw `gen type check error: '}' not found!`;
+		let num: number | undefined = undefined;
+		if (p.idx >= p.s.length)
+			throw `gen type check error: '}' not found!`;
 		if (p.s[p.idx] != ']') {
 			let numscope = FindNum(p.s, p.idx);
-			if (numscope == undefined) throw `gen type check error: array [<NUM>] format error!`;
-			p.idx = numscope.end+1;
+			if (numscope == undefined)
+				throw `gen type check error: array [<NUM>] format error!`;
+			p.idx = numscope.end + 1;
 			num = parseInt(p.s.substr(numscope.start, numscope.len));
 		}
-		if (p.idx >= p.s.length)	throw `gen type check error: ']' not found!`;
+		if (p.idx >= p.s.length)
+			throw `gen type check error: ']' not found!`;
 		if (p.s[p.idx] != ']') {
 			throw `gen type check error: array [<NUM>] ']' not found!`;
 		}
 		++p.idx;
-		let arrNode:CType = {type:EType.array, num, is_number:false};
+		let arrNode: CType = { type: EType.array, num, is_number: false };
 		if (p.idx < p.s.length && p.s[p.idx] == '[') {
 			let nextArrNode = _ParseType(p);
-			if (!nextArrNode) throw `gen type check error: multi array error!`;
+			if (!nextArrNode)
+				throw `gen type check error: multi array error!`;
 			arrNode.next = nextArrNode;
 		}
 		return arrNode;
@@ -321,21 +335,23 @@ function _ParseType(p:{s:string, idx:number}): CType|undefined {
 			throw `gen type check error: base type not found!`;
 		}
 		const typename = p.s.substr(typescope.start, typescope.len);
-		if (!ETypeNames[<any>typename]) throw `gen type check error: base type = ${typename} not exist!`;
+		if (!ETypeNames[<any>typename])
+			throw `gen type check error: base type = ${typename} not exist!`;
 		if (typename == ETypeNames.vector2 || typename == ETypeNames.vector3) {
-			thisNode = {type:EType.base, typename:ETypeNames.float, is_number:true};
-			const prevNode: CType = { type:EType.array, num:((typename==ETypeNames.vector2)?2:3), is_number:false, arr_level:0 };
+			thisNode = { type: EType.base, typename: ETypeNames.float, is_number: true };
+			const prevNode: CType = { type: EType.array, num: ((typename == ETypeNames.vector2) ? 2 : 3), is_number: false, arr_level: 0 };
 			prevNode.next = thisNode;
 			thisNode = prevNode;
 		} else {
-			thisNode = {type: BaseDateTypeSet.has(typename)?EType.date:EType.base, typename:<ETypeNames>typename, is_number:BaseNumberTypeSet.has(typename)};
+			thisNode = { type: BaseDateTypeSet.has(typename) ? EType.date : EType.base, typename: <ETypeNames>typename, is_number: BaseNumberTypeSet.has(typename) };
 		}
-		p.idx = typescope.end+1;
+		p.idx = typescope.end + 1;
 	}
 
 	if (p.s[p.idx] == '[') {
 		let tt = _ParseType(p);
-		if (tt == undefined) throw `gen type check error: [] type error`;
+		if (tt == undefined)
+			throw `gen type check error: [] type error`;
 		const typeNode = thisNode;
 		thisNode = tt;
 		while (tt.next != undefined) {
@@ -351,8 +367,9 @@ function _ParseType(p:{s:string, idx:number}): CType|undefined {
 	return thisNode;
 }
 
-function _ParseDate(date: any, type: CType): string|number {
-	if (type.type != EType.date) throw `value is not a date type`;
+function _ParseDate(date: any, type: CType): string | number {
+	if (type.type != EType.date)
+		throw `value is not a date type`;
 	if (isDate(date)) {
 		switch (type.typename) {
 			case ETypeNames.utctime:
@@ -366,14 +383,16 @@ function _ParseDate(date: any, type: CType): string|number {
 		}
 	} else if (isString(date)) {
 		const oDate = moment.default(date, DateFmt);
-		if (!oDate.isValid()) throw `[TypeParserer] Date Type "${date}" Invalid!`;
+		if (!oDate.isValid())
+			throw `[TypeParserer] Date Type "${date}" Invalid!`;
 		return _ParseDate(oDate.toDate(), type);
 	}
-	return date||'';
+	return date || '';
 }
 
-function _ParseNumber(n: number|string, type: CType): number {
-	if (!type.is_number) throw `value is not a number`;
+function _ParseNumber(n: number | string, type: CType): number {
+	if (!type.is_number)
+		throw `value is not a number`;
 	if (isNumber(n)) {
 		let num = 0;
 		if (type.typename == ETypeNames.double || type.typename == ETypeNames.float) {
@@ -397,16 +416,19 @@ function _ParseNumber(n: number|string, type: CType): number {
 
 const ArrayLevelSpilter = [',', ';', '\n', '\0'];
 
-function _Parse(value: any, type: CType|undefined): any {
-	if (type == undefined) return value;
+function _Parse(value: any, type: CType | undefined): any {
+	if (type == undefined)
+		return value;
 	switch (type.type) {
 		case EType.array:
 			{
-				const Spliter = ArrayLevelSpilter[type.arr_level||0];
+				const Spliter = ArrayLevelSpilter[type.arr_level || 0];
 				const arrStr = (<string>value).split(Spliter);
 				const arrResult = new Array<any>();
-				// if (!isArray(value)) throw `${value} is not a valid json type`;
-				if (type.next == undefined) throw `type array next is undefined`;
+				// if (!isArray(value))
+				// 	throw `${value} is not a valid json type`;
+				if (type.next == undefined)
+					throw `type array next is undefined`;
 				if (type.num != undefined && type.num != arrStr.length) {
 					throw `type array length = "${type.num}" Actual = "${arrStr.length}". Error At : "${value}"`;
 				}
@@ -422,11 +444,11 @@ function _Parse(value: any, type: CType|undefined): any {
 			} else if (type.typename == ETypeNames.bool) {
 				return BooleanKeyMap.get(value.w.toLowerCase());
 			}
-			return value||'';
+			return value || '';
 		case EType.date:
 			return _ParseDate(value, type);
 	}
-	return value||'';
+	return value || '';
 }
 
 

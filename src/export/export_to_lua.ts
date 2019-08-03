@@ -5,7 +5,8 @@ import { EType } from "../CTypeParser";
 import * as json_to_lua from 'json_to_lua';
 
 function ParseJsonObject(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg) {
-	if (sheetRow.type != utils.ESheetRowType.data) return;
+	if (sheetRow.type != utils.ESheetRowType.data)
+		return;
 	let item: any = {};
 	if (rootNode["ids"] == undefined) {
 		rootNode["ids"] = new Array<any>();
@@ -52,7 +53,7 @@ class LuaExport extends utils.IExportWrapper {
 				return false;
 			}
 
-			let FMT: string|undefined = this._exportCfg.ExportTemple;
+			let FMT: string | undefined = this._exportCfg.ExportTemple;
 			if (FMT == undefined) {
 				utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
 				return false;
@@ -66,10 +67,11 @@ class LuaExport extends utils.IExportWrapper {
 				return false;
 			}
 			const jscontent = FMT.replace("{name}", dt.name).replace("{data}", json_to_lua.jsObjectToLuaPretty(jsonObj, 2));
-			const outfile = path.join(outdir, dt.name+this._exportCfg.ExtName);
-			await fs.writeFileAsync(outfile, jscontent, {encoding:'utf8', flag:'w+'});
+			const outfile = path.join(outdir, dt.name + this._exportCfg.ExtName);
+			await fs.writeFileAsync(outfile, jscontent, { encoding: 'utf8', flag: 'w+' });
 			utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
-							 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);		}
+				+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+		}
 		return true;
 	}
 
@@ -81,7 +83,7 @@ class LuaExport extends utils.IExportWrapper {
 			utils.exception(`create output path "${utils.yellow_ul(path.dirname(outdir))}" failure!`);
 			return false;
 		}
-		let FMT: string|undefined = this._exportCfg.ExportTemple;
+		let FMT: string | undefined = this._exportCfg.ExportTemple;
 		if (FMT == undefined) {
 			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
 			return false;
@@ -91,13 +93,13 @@ class LuaExport extends utils.IExportWrapper {
 			return false;
 		}
 		const jscontent = FMT.replace("{data}", json_to_lua.jsObjectToLuaPretty(this._globalObj, 3));
-		await fs.writeFileAsync(outdir, jscontent, {encoding:'utf8', flag:'w+'});
+		await fs.writeFileAsync(outdir, jscontent, { encoding: 'utf8', flag: 'w+' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
-						 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 		return true;
 	}
 
 	private _globalObj: any = {};
 }
 
-module.exports = function(exportCfg: utils.ExportCfg):utils.IExportWrapper { return new LuaExport(exportCfg); };
+module.exports = function (exportCfg: utils.ExportCfg): utils.IExportWrapper { return new LuaExport(exportCfg); };

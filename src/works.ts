@@ -5,15 +5,15 @@ import * as utils from './utils';
 ////////////////////////////////////////////////////////////////////////////////
 //#region Export Wrapper
 
-import {gCfg, gRootDir, gGlobalIgnoreDirName} from './config'
+import { gCfg, gRootDir, gGlobalIgnoreDirName } from './config'
 import { HandleExcelFile } from './excel_utils'
 import { CHightTypeChecker } from './CHighTypeChecker';
 const gExportWrapperLst = new Array<utils.IExportWrapper>();
 for (const exportCfg of gCfg.Export) {
 	const Constructor = utils.ExportWrapperMap.get(exportCfg.type);
 	if (Constructor == undefined) {
-		utils.exception(utils.red(`Export is not currently supported for the current type "${utils.yellow_ul(exportCfg.type)}"!\n` + 
-								  `ERROR : Export constructor not found. initialize failure!`));
+		utils.exception(utils.red(`Export is not currently supported for the current type "${utils.yellow_ul(exportCfg.type)}"!\n` +
+			`ERROR : Export constructor not found. initialize failure!`));
 		break;
 	}
 	const Exportor = Constructor.call(Constructor, exportCfg);
@@ -28,7 +28,7 @@ for (const exportCfg of gCfg.Export) {
 //#endregion
 
 
-export async function execute() : Promise<boolean> {
+export async function execute(): Promise<boolean> {
 	if (!await HandleReadData()) {
 		throw `handle read excel data failure.`;
 	}
@@ -50,10 +50,10 @@ async function HandleDir(dirName: string): Promise<boolean> {
 	}
 	const pa = await fs.readdirAsync(dirName);
 	WorkerMonitor.addWork(pa.length);
-	pa.forEach(async function(fileName){
+	pa.forEach(async function (fileName) {
 		const filePath = path.join(dirName, fileName);
 		let info = await fs.statAsync(filePath);
-		if(!info.isFile()) {
+		if (!info.isFile()) {
 			WorkerMonitor.decWork();
 			return false;
 		}
@@ -121,25 +121,25 @@ function HandleHighLevelTypeCheck(): boolean {
 					foundError = true;
 					// header.highCheck.checkType(data); // for debug
 					utils.exceptionRecord(`Excel "${utils.yellow_ul(database.filename)}" `
-						+ `Sheet Row "${utils.yellow_ul(database.name+'.'+utils.yellow_ul(header.name))}" High Type format error`
-						+ `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(header.cIdx)+(row.cIdx+1).toString())}" `
+						+ `Sheet Row "${utils.yellow_ul(database.name + '.' + utils.yellow_ul(header.name))}" High Type format error`
+						+ `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(header.cIdx) + (row.cIdx + 1).toString())}" `
 						+ ` "${utils.yellow_ul(data)}"!`, ex);
 				}
 			}
 		}
 	}
 	utils.logger(`${foundError ? utils.red('[FAILURE]') : utils.green('[SUCCESS]')} `
-				+ `CHECK ALL HIGH TYPE DONE. Total Use Tick : ${utils.green(utils.TimeUsed.LastElapse())}`);
+		+ `CHECK ALL HIGH TYPE DONE. Total Use Tick : ${utils.green(utils.TimeUsed.LastElapse())}`);
 	return !foundError;
 }
 
-async function HandleExportAll() : Promise<boolean> {
+async function HandleExportAll(): Promise<boolean> {
 	const monitor = new utils.AsyncWorkMonitor();
 	let allOK = true;
 	for (const kv of utils.ExportExcelDataMap) {
 		for (const handler of gExportWrapperLst) {
 			monitor.addWork();
-			handler.ExportToAsync(kv[1], gCfg, (ok)=>{
+			handler.ExportToAsync(kv[1], gCfg, (ok) => {
 				allOK = allOK && ok;
 				monitor.decWork();
 			});
@@ -147,7 +147,7 @@ async function HandleExportAll() : Promise<boolean> {
 	}
 	for (const handler of gExportWrapperLst) {
 		monitor.addWork();
-		handler.ExportToGlobalAsync(gCfg, (ok)=>{
+		handler.ExportToGlobalAsync(gCfg, (ok) => {
 			allOK = allOK && ok;
 			monitor.decWork();
 		});

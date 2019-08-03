@@ -22,17 +22,18 @@ export function logger(...args: any[]) {
 	console.log(...args);
 }
 export function debug(...args: any[]) {
-	if (!gCfg.EnableDebugOutput) return;
+	if (!gCfg.EnableDebugOutput)
+		return;
 	logger(...args);
 }
 let ExceptionLog = '';
-export function exception(txt: string, ex?:any): never {
+export function exception(txt: string, ex?: any): never {
 	exceptionRecord(txt, ex);
 	throw txt;
 }
 // record exception not throw.
-export function exceptionRecord(txt: string, ex?:any): void {
-	const LOG_CTX = `${red(`+ [ERROR] `)} ${txt}\n${red(ex?ex:'')}\n`;
+export function exceptionRecord(txt: string, ex?: any): void {
+	const LOG_CTX = `${red(`+ [ERROR] `)} ${txt}\n${red(ex ? ex : '')}\n`;
 	ExceptionLog += LOG_CTX;
 	logger(LOG_CTX);
 }
@@ -51,12 +52,11 @@ export function NullStr(s: string) {
 ////////////////////////////////////////////////////////////////////////////////
 //#region Time Profile
 /************* total use tick ****************/
-let BeforeExistHandler: ()=>void;
-export function SetBeforeExistHandler(handler: ()=>void) {
+let BeforeExistHandler: () => void;
+export function SetBeforeExistHandler(handler: () => void) {
 	BeforeExistHandler = handler;
 }
-export module TimeUsed
-{
+export module TimeUsed {
 	export function LastElapse(): string {
 		const Now = Date.now();
 		const elpase = Now - _LastAccess;
@@ -71,7 +71,7 @@ export module TimeUsed
 	const _StartTime = Date.now();
 	let _LastAccess = _StartTime;
 
-	process.addListener('beforeExit', ()=>{
+	process.addListener('beforeExit', () => {
 		process.removeAllListeners('beforeExit');
 		const HasException = !NullStr(ExceptionLog);
 		if (BeforeExistHandler && !HasException) {
@@ -79,7 +79,7 @@ export module TimeUsed
 		}
 		const color = HasException ? red : green;
 		logger(color(`----------------------------------------`));
-		logger(color(`-          ${HasException?'Got Exception !!!':'    Well Done    '}           -`));
+		logger(color(`-          ${HasException ? 'Got Exception !!!' : '    Well Done    '}           -`));
 		logger(color(`----------------------------------------`));
 		logger(`Total Use Tick : "${yellow_ul(TotalElapse())}"`);
 
@@ -96,8 +96,7 @@ export module TimeUsed
 
 ////////////////////////////////////////////////////////////////////////////////
 //#region async Worker Monitor
-export class AsyncWorkMonitor
-{
+export class AsyncWorkMonitor {
 	public addWork(cnt: number = 1) {
 		this._leftCnt += cnt;
 	}
@@ -105,7 +104,8 @@ export class AsyncWorkMonitor
 		this._leftCnt -= cnt;
 	}
 	public async WaitAllWorkDone(): Promise<boolean> {
-		if (this._leftCnt <= 0) return true;
+		if (this._leftCnt <= 0)
+			return true;
 		while (true) {
 			if (this._leftCnt <= 0) {
 				return true;
@@ -161,7 +161,8 @@ export class SheetDataTable {
 	}
 	public containsColumName(name: string): boolean {
 		for (const header of this.arrTypeHeader) {
-			if (header.name == name) return true;
+			if (header.name == name)
+				return true;
 		}
 		return false;
 	}
@@ -184,7 +185,7 @@ export class SheetDataTable {
 		}
 		return false;
 	}
-	private columnKeysMap = new Map<string, Set<any> >();
+	private columnKeysMap = new Map<string, Set<any>>();
 }
 // all export data here
 export const ExportExcelDataMap = new Map<string, SheetDataTable>();
@@ -216,7 +217,7 @@ export abstract class IExportWrapper {
 		this._exportCfg = exportCfg;
 	}
 	public abstract get DefaultExtName(): string;
-	public async ExportToAsync(dt: SheetDataTable, cfg: GlobalCfg, endCallBack: (ok: boolean)=>void): Promise<boolean> {
+	public async ExportToAsync(dt: SheetDataTable, cfg: GlobalCfg, endCallBack: (ok: boolean) => void): Promise<boolean> {
 		let ok = false;
 		try {
 			ok = await this.ExportTo(dt, cfg);
@@ -228,7 +229,7 @@ export abstract class IExportWrapper {
 		}
 		return ok;
 	}
-	public async ExportToGlobalAsync(cfg: GlobalCfg, endCallBack: (ok: boolean)=>void): Promise<boolean> {
+	public async ExportToGlobalAsync(cfg: GlobalCfg, endCallBack: (ok: boolean) => void): Promise<boolean> {
 		let ok = false;
 		try {
 			ok = await this.ExportGlobal(cfg);
@@ -251,9 +252,10 @@ export abstract class IExportWrapper {
 	}
 
 	protected IsFile(s: string): boolean {
-		const ext = this._exportCfg.ExtName||this.DefaultExtName;
+		const ext = this._exportCfg.ExtName || this.DefaultExtName;
 		const idx = s.lastIndexOf(ext);
-		if (idx < 0) return false;
+		if (idx < 0)
+			return false;
 		return (idx + ext.length == s.length);
 	}
 
@@ -263,7 +265,8 @@ export abstract class IExportWrapper {
 
 export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<SheetHeader>): Array<SheetHeader> {
 	let result = new Array<SheetHeader>();
-	if (arrGrpFilters.length <= 0) return result;
+	if (arrGrpFilters.length <= 0)
+		return result;
 	// translate
 	const RealFilter = new Array<string>();
 	for (const ele of arrGrpFilters) {
@@ -293,7 +296,7 @@ export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<S
 }
 
 
-export type ExportWrapperFactory = (cfg: ExportCfg)=>IExportWrapper;
+export type ExportWrapperFactory = (cfg: ExportCfg) => IExportWrapper;
 export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['csv', require('./export/export_to_csv')],
 	['json', require('./export/export_to_json')],
@@ -307,10 +310,10 @@ export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 ////////////////////////////////////////////////////////////////////////////////
 //#region Format Converter
 export module FMT26 {
-	export function NumToS26(num: number): string{
-		let result="";
+	export function NumToS26(num: number): string {
+		let result = "";
 		++num;
-		while (num > 0){
+		while (num > 0) {
 			let m = num % 26;
 			if (m == 0) m = 26;
 			result = String.fromCharCode(m + 64) + result;
@@ -322,9 +325,10 @@ export module FMT26 {
 	export function S26ToNum(str: string): number {
 		let result = 0;
 		let ss = str.toUpperCase();
-		for (let i = str.length - 1, j = 1; i >= 0; i--, j *= 26) {
+		for (let i = str.length - 1, j = 1; i >= 0; i-- , j *= 26) {
 			let c = ss[i];
-			if (c < 'A' || c > 'Z') return 0;
+			if (c < 'A' || c > 'Z')
+				return 0;
 			result += (c.charCodeAt(0) - 64) * j;
 		}
 		return --result;
