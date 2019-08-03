@@ -34,8 +34,9 @@ function DumpToString(data: any) {
 	} else if (utils.isObject(data)) {
 		let s = '';
 		for (let name in data) {
-			if (data[name] === undefined) continue;
-			s += `${s.length===0?'':','}${name}:${DumpToString(data[name])}`;
+			const v = (<any>data)[name];
+			if (v === undefined) continue;
+			s += `${s.length===0?'':','}${name}:${DumpToString(v)}`;
 		}
 		return `{${s}}`;
 	} else if (utils.isBoolean(data)) {

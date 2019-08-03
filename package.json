@@ -1,6 +1,6 @@
 {
   "name": "excel_tiny_wrapper",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "description": "excel export with type check using nodejs in super fast speed!",
   "main": "bin/index.js",
   "scripts": {
@@ -13,13 +13,14 @@
     "chalk": "^2.4.2",
     "fs-extra-promise": "^1.0.1",
     "json_to_lua": "^1.1.0",
+    "lodash": "^4.17.15",
     "moment": "^2.24.0",
-    "xlsx": "^0.14.1"
+    "xlsx": "^0.14.4"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",
-    "@types/fs-extra-promise": "^1.0.7",
-    "@types/lodash": "^4.14.122",
+    "@types/fs-extra-promise": "^1.0.8",
+    "@types/lodash": "^4.14.136",
     "@types/moment": "^2.13.0",
     "@types/node": "^12.6.9",
     "@types/xlsx": "0.0.36",
