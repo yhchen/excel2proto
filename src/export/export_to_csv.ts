@@ -28,7 +28,7 @@ function ParseCSVLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow
 			} else if (utils.isBoolean(value)) {
 				tmpValue = value ? 'true' : 'false';
 			} else {
-				throw `export INNER ERROR`;
+				utils.exception(`export INNER ERROR`);
 			}
 			if (tmpValue.indexOf(',') < 0 && tmpValue.indexOf('"') < 0) {
 				tmpValue = tmpValue.replace(/"/g, `""`);
@@ -46,7 +46,7 @@ class CSVExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
 	public get DefaultExtName(): string { return '.csv'; }
-	public async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		if (!this.CreateDir(outdir)) {
 			utils.exception(`output path "${utils.yellow_ul(outdir)}" not exists!`);
@@ -70,9 +70,7 @@ class CSVExport extends utils.IExportWrapper {
 
 		return true;
 	}
-
-	public ExportEnd(cfg: utils.GlobalCfg): void {
-	}
+	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> { return true; }
 }
 
 module.exports = function(exportCfg: utils.ExportCfg):utils.IExportWrapper { return new CSVExport(exportCfg); };

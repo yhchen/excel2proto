@@ -23,7 +23,7 @@ class JSONExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
 	public get DefaultExtName(): string { return '.json'; }
-	public async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let jsonObj = {};
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
@@ -50,17 +50,18 @@ class JSONExport extends utils.IExportWrapper {
 		return true;
 	}
 
-	public ExportEnd(cfg: utils.GlobalCfg): void {
+	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
-		if (!this.IsFile(outdir)) return;
+		if (!this.IsFile(outdir)) return true;
 		if (!this.CreateDir(path.dirname(outdir))) {
 			utils.exception(`create output path "${utils.yellow_ul(path.dirname(outdir))}" failure!`);
-			return;
+			return false;
 		}
 		const jsoncontent = JSON.stringify(this._globalObj||"{}");
-		fs.writeFileSync(outdir, jsoncontent, {encoding:'utf8', flag:'w+'});
+		await fs.writeFileAsync(outdir, jsoncontent, {encoding:'utf8', flag:'w+'});
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
 						 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+		return true;
 	}
 
 	private _globalObj: any = {};

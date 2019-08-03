@@ -29,9 +29,6 @@ for (const exportCfg of gCfg.Export) {
 
 
 export async function execute() : Promise<boolean> {
-	if (!InitEnv()) {
-		throw `Init Env Failure!`;
-	}
 	if (!await HandleReadData()) {
 		throw `handle read excel data failure.`;
 	}
@@ -137,23 +134,26 @@ function HandleHighLevelTypeCheck(): boolean {
 }
 
 async function HandleExportAll() : Promise<boolean> {
+	const monitor = new utils.AsyncWorkMonitor();
+	let allOK = true;
 	for (const kv of utils.ExportExcelDataMap) {
 		for (const handler of gExportWrapperLst) {
-			if (!await handler.ExportTo(kv[1], gCfg)) {
-				return false;
-			}
+			monitor.addWork();
+			handler.ExportToAsync(kv[1], gCfg, (ok)=>{
+				allOK = allOK && ok;
+				monitor.decWork();
+			});
 		}
 	}
-	return true;
-}
-
-function InitEnv(): boolean {
-	utils.SetBeforeExistHandler(()=>{
-		for (let handler of gExportWrapperLst) {
-			handler.ExportEnd(gCfg);
-		}
-	});
-	return true;
+	for (const handler of gExportWrapperLst) {
+		monitor.addWork();
+		handler.ExportToGlobalAsync(gCfg, (ok)=>{
+			allOK = allOK && ok;
+			monitor.decWork();
+		});
+	}
+	await monitor.WaitAllWorkDone();
+	return allOK;
 }
 
 //#endregion

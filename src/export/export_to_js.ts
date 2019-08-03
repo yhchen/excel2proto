@@ -51,7 +51,7 @@ class JSExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
 	public get DefaultExtName(): string { return '.js'; }
-	public async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let jsObj = {};
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
@@ -92,26 +92,27 @@ class JSExport extends utils.IExportWrapper {
 		return true;
 	}
 
-	public ExportEnd(cfg: utils.GlobalCfg): void {
+	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
-		if (!this.IsFile(outdir)) return;
+		if (!this.IsFile(outdir)) return true;
 		if (!this.CreateDir(path.dirname(outdir))) {
 			utils.exception(`create output path "${utils.yellow_ul(path.dirname(outdir))}" failure!`);
-			return;
+			return false;
 		}
 		let FMT: string|undefined = this._exportCfg.ExportTemple;
 		if (FMT == undefined) {
 			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
-			return;
+			return false;
 		}
 		if (FMT.indexOf('{data}') < 0) {
 			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not found Keyword ${utils.yellow_ul("{data}")}!`);
-			return;
+			return false;
 		}
 		const jscontent = FMT.replace("{data}", DumpToString(this._globalObj));
-		fs.writeFileSync(outdir, jscontent, {encoding:'utf8', flag:'w+'});
+		await fs.writeFileAsync(outdir, jscontent, {encoding:'utf8', flag:'w+'});
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
 						 + `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
+		return true;
 	}
 
 	private _globalObj: any = {};

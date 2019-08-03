@@ -216,8 +216,32 @@ export abstract class IExportWrapper {
 		this._exportCfg = exportCfg;
 	}
 	public abstract get DefaultExtName(): string;
-	public abstract async ExportTo(dt: SheetDataTable, cfg: GlobalCfg): Promise<boolean>;
-	public abstract ExportEnd(cfg: GlobalCfg): void;
+	public async ExportToAsync(dt: SheetDataTable, cfg: GlobalCfg, endCallBack: (ok: boolean)=>void): Promise<boolean> {
+		let ok = false;
+		try {
+			ok = await this.ExportTo(dt, cfg);
+		} catch (ex) {
+			// do nothing...
+		}
+		if (endCallBack) {
+			endCallBack(ok);
+		}
+		return ok;
+	}
+	public async ExportToGlobalAsync(cfg: GlobalCfg, endCallBack: (ok: boolean)=>void): Promise<boolean> {
+		let ok = false;
+		try {
+			ok = await this.ExportGlobal(cfg);
+		} catch (ex) {
+			// do nothing...
+		}
+		if (endCallBack) {
+			endCallBack(ok);
+		}
+		return ok;
+	}
+	protected abstract async ExportTo(dt: SheetDataTable, cfg: GlobalCfg): Promise<boolean>;
+	protected abstract async ExportGlobal(cfg: GlobalCfg): Promise<boolean>;
 	protected CreateDir(outdir: string): boolean {
 		if (!fs.existsSync(outdir)) {
 			fs.ensureDirSync(outdir);
