@@ -18,6 +18,10 @@ export const brightWhite = chalk.default.whiteBright.bold
 
 ////////////////////////////////////////////////////////////////////////////////
 //#region Logger
+export const enum E_ERROR_LEVEL {
+	EXECUTE_FAILURE = -1,
+	INIT_EXTENDS = -1001,
+}
 export function logger(...args: any[]) {
 	console.log(...args);
 }

@@ -1,11 +1,11 @@
 const ExportExcelDataMap = require('./utils').ExportExcelDataMap
 
-Item = ExportExcelDataMap.get('Item');
-Equip = ExportExcelDataMap.get('Equip');
+const Item = ExportExcelDataMap.get('Item');
+const Equip = ExportExcelDataMap.get('Equip');
 
 ////////////////////////////////////////////////////////////////////////////////
 // 👇👇👇enum type add below👇👇👇
-enums = {
+const enums = {
 	EItemType: {
 		Item: 1,
 		Equip: 2,
@@ -19,7 +19,7 @@ enums = {
 
 ////////////////////////////////////////////////////////////////////////////////
 // 👇👇👇check function add below👇👇👇
-checker = {
+const checker = {
 	CheckItem: function (data) {
 		return Item.checkColumnContainsValue('id', data[0]);
 	},

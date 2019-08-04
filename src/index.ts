@@ -29,6 +29,7 @@ async function main() {
 		console.log('--------------------------------------------------------------------');
 	} catch (ex) {
 		utils.exception(ex);
+		process.exit(utils.E_ERROR_LEVEL.EXECUTE_FAILURE);
 	}
 }
 

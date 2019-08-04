@@ -5,8 +5,13 @@ let type_enums: any = undefined;
 let type_checker: any = undefined;
 
 function InitEnv() {
-	type_enums = require('./type_extens_checker').enums;
-	type_checker = require('./type_extens_checker').checker;
+	try {
+		type_enums = require('./type_extens_checker').enums;
+		type_checker = require('./type_extens_checker').checker;
+	} catch (ex) {
+		utils.exception(`type_extens_checker format error ${ex}`);
+		process.exit(utils.E_ERROR_LEVEL.INIT_EXTENDS);
+	}
 	// convert enum (key -> value) to (value -> key)
 	for (let key in type_enums) {
 		const node = type_enums[key];

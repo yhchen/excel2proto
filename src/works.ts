@@ -7,7 +7,6 @@ import * as utils from './utils';
 
 import { gCfg, gRootDir, gGlobalIgnoreDirName } from './config'
 import { HandleExcelFile } from './excel_utils'
-import { CHightTypeChecker } from './CHighTypeChecker';
 const gExportWrapperLst = new Array<utils.IExportWrapper>();
 for (const exportCfg of gCfg.Export) {
 	const Constructor = utils.ExportWrapperMap.get(exportCfg.type);
