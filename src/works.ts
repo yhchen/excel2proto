@@ -43,29 +43,35 @@ export async function execute(): Promise<boolean> {
 ////////////////////////////////////////////////////////////////////////////////
 //#region private side
 const WorkerMonitor = new utils.AsyncWorkMonitor();
-async function HandleDir(dirName: string): Promise<boolean> {
+async function HandleExcelFileWork(fileName: string, cb: (ret:boolean)=>void): Promise<void> {
+	WorkerMonitor.addWork();
+	cb(await HandleExcelFile(fileName));
+	WorkerMonitor.decWork();
+}
+
+async function HandleDir(dirName: string, cb: (ret:boolean)=>void): Promise<void> {
 	if (gGlobalIgnoreDirName.has(path.basename(dirName))) {
 		utils.logger(`ignore folder ${dirName}`);
+		return;
 	}
+	WorkerMonitor.addWork();
 	const pa = await fs.readdirAsync(dirName);
-	WorkerMonitor.addWork(pa.length);
-	pa.forEach(async function (fileName) {
+	pa.forEach(function (fileName) {
 		const filePath = path.join(dirName, fileName);
-		let info = await fs.statAsync(filePath);
+		let info = fs.statSync(filePath);
 		if (!info.isFile()) {
-			WorkerMonitor.decWork();
-			return false;
+			return;
 		}
-		if (!await HandleExcelFile(filePath)) {
-			WorkerMonitor.decWork();
-			return false;
-		}
-		WorkerMonitor.decWork();
+		HandleExcelFileWork(filePath, cb);
 	});
-	return true;
+	WorkerMonitor.decWork();
 }
 
 async function HandleReadData(): Promise<boolean> {
+	let ret = true;
+	const cb = (v: boolean) => {
+		ret = ret && v;
+	}
 	for (let fileOrPath of gCfg.IncludeFilesAndPath) {
 		if (!path.isAbsolute(fileOrPath)) {
 			fileOrPath = path.join(gRootDir, fileOrPath);
@@ -75,19 +81,17 @@ async function HandleReadData(): Promise<boolean> {
 			break;
 		}
 		if (fs.statSync(fileOrPath).isDirectory()) {
-			HandleDir(fileOrPath);
+			HandleDir(fileOrPath, cb);
 		} else if (fs.statSync(fileOrPath).isFile()) {
-			if (!await HandleExcelFile(fileOrPath)) {
-				return false;
-			}
+			HandleExcelFileWork(fileOrPath, cb);
 		} else {
 			utils.exception(`UnHandle file or directory type : "${utils.yellow_ul(fileOrPath)}"`);
 		}
 	}
-	await WorkerMonitor.delay(1000);
+	await WorkerMonitor.delay(50);
 	await WorkerMonitor.WaitAllWorkDone();
 	utils.logger(`${utils.green('[SUCCESS]')} READ ALL SHEET DONE. Total Use Tick : ${utils.green(utils.TimeUsed.LastElapse())}`);
-	return true;
+	return ret;
 }
 
 function HandleHighLevelTypeCheck(): boolean {

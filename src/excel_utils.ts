@@ -11,15 +11,15 @@ export async function HandleExcelFile(fileName: string): Promise<boolean> {
 	try {
 		const extname = path.extname(fileName);
 		if (extname != '.xls' && extname != '.xlsx') {
-			return false;
+			return true;
 		}
 		if (path.basename(fileName)[0] == '!') {
 			utils.debug(`- Pass File "${fileName}"`);
-			return false;
+			return true;
 		}
 		if (path.basename(fileName).indexOf(`~$`) == 0) {
 			utils.debug(`- Pass File "${fileName}"`);
-			return false;
+			return true;
 		}
 		let opt: xlsx.ParsingOptions = {
 			type: "buffer",
@@ -46,7 +46,7 @@ export async function HandleExcelFile(fileName: string): Promise<boolean> {
 			utils.exception(`excel ${utils.yellow_ul(fileName)} open failure.`);
 		}
 		if (excel.Sheets == null) {
-			return false;
+			return true;
 		}
 		for (let sheetName of excel.SheetNames) {
 			utils.debug(`- Handle excel "${utils.brightWhite(fileName)}" Sheet "${utils.yellow_ul(sheetName)}"`);
@@ -67,6 +67,7 @@ export async function HandleExcelFile(fileName: string): Promise<boolean> {
 	}
 	return true;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 //#region private side
 function GetCellData(worksheet: xlsx.WorkSheet, c: number, r: number): xlsx.CellObject | undefined {
