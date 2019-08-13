@@ -1,33 +1,33 @@
 import * as path from 'path';
 import * as fs from 'fs-extra-promise';
 import * as utils from './utils';
-
-////////////////////////////////////////////////////////////////////////////////
-//#region Export Wrapper
-
 import { gCfg, gRootDir, gGlobalIgnoreDirName } from './config'
 import { HandleExcelFile } from './excel_utils'
+
 const gExportWrapperLst = new Array<utils.IExportWrapper>();
-for (const exportCfg of gCfg.Export) {
-	const Constructor = utils.ExportWrapperMap.get(exportCfg.type);
-	if (Constructor == undefined) {
-		utils.exception(utils.red(`Export is not currently supported for the current type "${utils.yellow_ul(exportCfg.type)}"!\n` +
-			`ERROR : Export constructor not found. initialize failure!`));
-		break;
-	}
-	const Exportor = Constructor.call(Constructor, exportCfg);
-	if (Exportor) {
-		if ((<any>exportCfg).ExtName == undefined) {
-			(<any>exportCfg).ExtName = Exportor.DefaultExtName;
+function InitEnv(): boolean {
+	for (const exportCfg of gCfg.Export) {
+		const Constructor = utils.ExportWrapperMap.get(exportCfg.type);
+		if (Constructor == undefined) {
+			utils.exceptionRecord(utils.red(`Export is not currently supported for the current type "${utils.yellow_ul(exportCfg.type)}"!\n` +
+				`ERROR : Export constructor not found. initialize failure!`));
+			return false;
 		}
-		gExportWrapperLst.push(Exportor);
+		const Exportor = Constructor.call(Constructor, exportCfg);
+		if (Exportor) {
+			if ((<any>exportCfg).ExtName == undefined) {
+				(<any>exportCfg).ExtName = Exportor.DefaultExtName;
+			}
+			gExportWrapperLst.push(Exportor);
+		}
 	}
+	return true;
 }
 
-//#endregion
-
-
 export async function execute(): Promise<boolean> {
+	if (!InitEnv()) {
+		throw `InitEnv failure!`;
+	}
 	if (!await HandleReadData()) {
 		throw `handle read excel data failure.`;
 	}
