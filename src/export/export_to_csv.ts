@@ -2,7 +2,7 @@ import * as utils from "../utils";
 import * as fs from "fs-extra-promise";
 import * as path from 'path';
 
-function ParseCSVLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg): string {
+function ParseCSVLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, exportCfg: utils.ExportCfg): string {
 	let tmpArry = new Array<string>();
 	for (let i = 0; i < sheetRow.values.length; ++i) {
 		let value = sheetRow.values[i];
@@ -46,7 +46,7 @@ class CSVExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
 	public get DefaultExtName(): string { return '.csv'; }
-	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		if (!this.CreateDir(outdir)) {
 			utils.exception(`output path "${utils.yellow_ul(outdir)}" not exists!`);
@@ -60,7 +60,7 @@ class CSVExport extends utils.IExportWrapper {
 		}
 		for (let row of dt.arrValues) {
 			if (row.type != utils.ESheetRowType.data && row.type != utils.ESheetRowType.header) continue;
-			arrTmp.push(ParseCSVLine(arrExportHeader, row, cfg, this._exportCfg));
+			arrTmp.push(ParseCSVLine(arrExportHeader, row, this._exportCfg));
 		}
 		const csvcontent = arrTmp.join(utils.LineBreaker) + utils.LineBreaker;
 		await fs.writeFileAsync(path.join(outdir, dt.name + this._exportCfg.ExtName), csvcontent, { encoding: 'utf8', flag: 'w+' });
@@ -70,7 +70,7 @@ class CSVExport extends utils.IExportWrapper {
 
 		return true;
 	}
-	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> { return true; }
+	protected async ExportGlobal(): Promise<boolean> { return true; }
 }
 
 module.exports = function (exportCfg: utils.ExportCfg): utils.IExportWrapper { return new CSVExport(exportCfg); };

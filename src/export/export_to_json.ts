@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from "fs-extra-promise";
 import * as utils from "../utils";
 
-function ParseJsonLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg) {
+function ParseJsonLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, exportCfg: utils.ExportCfg) {
 	if (sheetRow.type != utils.ESheetRowType.data)
 		return;
 	let item: any = {};
@@ -24,7 +24,7 @@ class JSONExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
 	public get DefaultExtName(): string { return '.json'; }
-	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let jsonObj = {};
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
@@ -33,7 +33,7 @@ class JSONExport extends utils.IExportWrapper {
 			return true;
 		}
 		for (let row of dt.arrValues) {
-			ParseJsonLine(arrExportHeader, row, jsonObj, cfg, this._exportCfg);
+			ParseJsonLine(arrExportHeader, row, jsonObj, this._exportCfg);
 		}
 		if (this.IsFile(outdir)) {
 			this._globalObj[dt.name] = jsonObj;
@@ -51,7 +51,7 @@ class JSONExport extends utils.IExportWrapper {
 		return true;
 	}
 
-	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportGlobal(): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		if (!this.IsFile(outdir))
 			return true;

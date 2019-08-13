@@ -30,7 +30,7 @@ class TSDExport extends utils.IExportWrapper {
 
 	public get DefaultExtName(): string { return '.d.ts'; }
 
-	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		let outdir = this._exportCfg.OutputDir;
 
 		if (this.IsFile(outdir)) {
@@ -65,7 +65,7 @@ class TSDExport extends utils.IExportWrapper {
 		return true;
 	}
 
-	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportGlobal(): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		if (!this.IsFile(outdir))
 			return true;

@@ -3,7 +3,7 @@ import * as fs from "fs-extra-promise";
 import * as utils from "../utils";
 
 function ParseJSLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow,
-	rootNode: any, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg): string | undefined {
+	rootNode: any, exportCfg: utils.ExportCfg): string | undefined {
 	if (sheetRow.type != utils.ESheetRowType.data)
 		return undefined;
 	let item: any = {};
@@ -52,7 +52,7 @@ class JSExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
 	public get DefaultExtName(): string { return '.js'; }
-	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let jsObj = {};
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
@@ -61,7 +61,7 @@ class JSExport extends utils.IExportWrapper {
 			return true;
 		}
 		for (let row of dt.arrValues) {
-			ParseJSLine(arrExportHeader, row, jsObj, cfg, this._exportCfg);
+			ParseJSLine(arrExportHeader, row, jsObj, this._exportCfg);
 		}
 		if (this.IsFile(outdir)) {
 			this._globalObj[dt.name] = jsObj;
@@ -93,7 +93,7 @@ class JSExport extends utils.IExportWrapper {
 		return true;
 	}
 
-	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportGlobal(): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		if (!this.IsFile(outdir))
 			return true;

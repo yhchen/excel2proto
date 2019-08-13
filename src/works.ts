@@ -142,7 +142,7 @@ async function HandleExportAll(): Promise<boolean> {
 	for (const kv of utils.ExportExcelDataMap) {
 		for (const handler of gExportWrapperLst) {
 			monitor.addWork();
-			handler.ExportToAsync(kv[1], gCfg, (ok) => {
+			handler.ExportToAsync(kv[1], (ok) => {
 				allOK = allOK && ok;
 				monitor.decWork();
 			});
@@ -150,7 +150,7 @@ async function HandleExportAll(): Promise<boolean> {
 	}
 	for (const handler of gExportWrapperLst) {
 		monitor.addWork();
-		handler.ExportToGlobalAsync(gCfg, (ok) => {
+		handler.ExportToGlobalAsync((ok) => {
 			allOK = allOK && ok;
 			monitor.decWork();
 		});

@@ -4,7 +4,7 @@ import * as path from 'path';
 import { EType } from "../CTypeParser";
 import * as json_to_lua from 'json_to_lua';
 
-function ParseJsonObject(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, cfg: utils.GlobalCfg, exportCfg: utils.ExportCfg) {
+function ParseJsonObject(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, exportCfg: utils.ExportCfg) {
 	if (sheetRow.type != utils.ESheetRowType.data)
 		return;
 	let item: any = {};
@@ -34,7 +34,7 @@ class LuaExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
 	public get DefaultExtName(): string { return '.lua'; }
-	protected async ExportTo(dt: utils.SheetDataTable, cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let jsonObj = {};
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
@@ -43,7 +43,7 @@ class LuaExport extends utils.IExportWrapper {
 			return true;
 		}
 		for (let row of dt.arrValues) {
-			ParseJsonObject(arrExportHeader, row, jsonObj, cfg, this._exportCfg);
+			ParseJsonObject(arrExportHeader, row, jsonObj, this._exportCfg);
 		}
 		if (this.IsFile(outdir)) {
 			this._globalObj[dt.name] = jsonObj;
@@ -75,7 +75,7 @@ class LuaExport extends utils.IExportWrapper {
 		return true;
 	}
 
-	protected async ExportGlobal(cfg: utils.GlobalCfg): Promise<boolean> {
+	protected async ExportGlobal(): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		if (!this.IsFile(outdir))
 			return true;
