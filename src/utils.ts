@@ -8,12 +8,13 @@ import { CHightTypeChecker } from './CHighTypeChecker';
 
 ////////////////////////////////////////////////////////////////////////////////
 //#region console color
-import * as chalk from 'chalk';
-export const yellow_ul = chalk.default.yellow.underline;	//yellow under line
-export const yellow = chalk.default.yellow;
-export const red = chalk.default.redBright;
-export const green = chalk.default.greenBright;
-export const brightWhite = chalk.default.whiteBright.bold
+import chalk from 'chalk';
+export const yellow_ul = chalk.yellow.underline;	//yellow under line
+export const orange_ul = chalk.magentaBright.underline.bold;	//orange under line
+export const yellow = chalk.yellow;
+export const red = chalk.redBright;
+export const green = chalk.greenBright;
+export const brightWhite = chalk.whiteBright.bold
 //#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,11 @@ export function debug(...args: any[]) {
 	if (!gCfg.EnableDebugOutput)
 		return;
 	logger(...args);
+}
+export function warn(txt: string): void {
+	const LOG_CTX = `${orange_ul(`+ [WARN] `)} ${txt}\n`;
+	ExceptionLogLst.push(LOG_CTX);
+	logger(LOG_CTX);
 }
 let ExceptionLogLst = new Array<string>();
 export function exception(txt: string, ex?: any): never {
