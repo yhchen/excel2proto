@@ -30,7 +30,7 @@ export function debug(...args: any[]) {
 		return;
 	logger(...args);
 }
-let ExceptionLog = '';
+let ExceptionLogLst = new Array<string>();
 export function exception(txt: string, ex?: any): never {
 	exceptionRecord(txt, ex);
 	throw txt;
@@ -38,7 +38,7 @@ export function exception(txt: string, ex?: any): never {
 // record exception not throw.
 export function exceptionRecord(txt: string, ex?: any): void {
 	const LOG_CTX = `${red(`+ [ERROR] `)} ${txt}\n${red(ex ? ex : '')}\n`;
-	ExceptionLog += LOG_CTX;
+	ExceptionLogLst.push(LOG_CTX);
 	logger(LOG_CTX);
 }
 //#endregion
@@ -77,7 +77,7 @@ export module TimeUsed {
 
 	process.addListener('beforeExit', () => {
 		process.removeAllListeners('beforeExit');
-		const HasException = StrNotEmpty(ExceptionLog);
+		const HasException = ExceptionLogLst.length > 0;
 		if (BeforeExistHandler && !HasException) {
 			BeforeExistHandler();
 		}
@@ -89,7 +89,7 @@ export module TimeUsed {
 
 		if (HasException) {
 			logger(red("Exception Logs:"));
-			logger(ExceptionLog);
+			logger(ExceptionLogLst.join('\n'));
 			process.exit(-1);
 		} else {
 			process.exit(0);
@@ -114,10 +114,10 @@ export class AsyncWorkMonitor {
 			if (this._leftCnt <= 0) {
 				return true;
 			}
-			await this.delay(0.01)
+			await this.delay()
 		}
 	}
-	public async delay(ms: number) {
+	public async delay(ms: number = 0) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 	private _leftCnt = 0;
@@ -125,7 +125,7 @@ export class AsyncWorkMonitor {
 //#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
-//#region Datas 
+//#region Datas
 // excel gen data table
 export enum ESheetRowType {
 	header = 1, // name row
