@@ -45,11 +45,11 @@ export function exceptionRecord(txt: string, ex?: any): void {
 
 ////////////////////////////////////////////////////////////////////////////////
 //#region base function
-export function NullStr(s: string) {
+export function StrNotEmpty(s: any): s is string {
 	if (isString(s)) {
-		return s.trim().length <= 0;
+		return s.trim().length > 0;
 	}
-	return true;
+	return false;
 }
 //#endregion
 
@@ -77,7 +77,7 @@ export module TimeUsed {
 
 	process.addListener('beforeExit', () => {
 		process.removeAllListeners('beforeExit');
-		const HasException = !NullStr(ExceptionLog);
+		const HasException = StrNotEmpty(ExceptionLog);
 		if (BeforeExistHandler && !HasException) {
 			BeforeExistHandler();
 		}

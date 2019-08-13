@@ -90,7 +90,7 @@ function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 	rIdx = HandleWorkSheetHighTypeColumn(worksheet, rIdx, RowMax, ColumnMax, fileName, sheetName, DataTable, arrHeaderName);
 	for (; rIdx <= RowMax; ++rIdx) {
 		const firstCell = GetCellData(worksheet, arrHeaderName[0].cIdx, rIdx);
-		if (firstCell == undefined || firstCell.w == undefined || utils.NullStr(firstCell.w)) {
+		if (firstCell == undefined || !utils.StrNotEmpty(firstCell.w)) {
 			continue;
 		}
 		if (firstCell.w[0] == '#') {
@@ -135,7 +135,7 @@ function HandleWorkSheetHighTypeColumn(worksheet: xlsx.WorkSheet,
 	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string }>): number {
 	for (; rIdx <= RowMax; ++rIdx) {
 		const firstCell = GetCellData(worksheet, arrHeaderName[0].cIdx, rIdx);
-		if (firstCell == undefined || firstCell.w == undefined || utils.NullStr(firstCell.w)) {
+		if (firstCell == undefined || !utils.StrNotEmpty(firstCell.w)) {
 			continue;
 		}
 		if (firstCell.w[0] == '#') {
@@ -166,16 +166,16 @@ function HandleWorkSheetNameColumn(worksheet: xlsx.WorkSheet,
 	// find column name
 	for (; rIdx <= RowMax; ++rIdx) {
 		const firstCell = GetCellData(worksheet, 0, rIdx);
-		if (firstCell == undefined || firstCell.w == undefined || utils.NullStr(firstCell.w)) {
+		if (firstCell == undefined || !utils.StrNotEmpty(firstCell.w)) {
 			continue;
 		}
 		if (firstCell.w[0] == '#') {
 			continue;
 		}
-		const tmpArry = [];
+		const tmpArry:any[] = [];
 		for (let cIdx = 0; cIdx <= ColumnMax; ++cIdx) {
 			const cell = GetCellData(worksheet, cIdx, rIdx);
-			if (cell == undefined || cell.w == undefined || utils.NullStr(cell.w) || cell.w[0] == '#') {
+			if (cell == undefined || !utils.StrNotEmpty(cell.w) || cell.w[0] == '#') {
 				continue;
 			}
 			const colGrp = GetCellFrontGroudColor(cell);
@@ -205,7 +205,7 @@ function HandleWorkSheetDataColumn(worksheet: xlsx.WorkSheet,
 		for (let col of arrHeaderName) {
 			const cell = GetCellData(worksheet, col.cIdx, rIdx);
 			if (firstCol) {
-				if (cell == undefined || cell.w == undefined || utils.NullStr(cell.w)) {
+				if (cell == undefined || !utils.StrNotEmpty(cell.w)) {
 					break;
 				}
 				else if (cell.w[0] == '#') {
@@ -248,7 +248,7 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 		utils.debug(`- Pass Sheet "${sheetName}" : Sheet is empty`);
 		return;
 	}
-	if (utils.NullStr(sheetName) || sheetName[0] == "!") {
+	if (!utils.StrNotEmpty(sheetName) || sheetName[0] == "!") {
 		utils.debug(`- Pass Sheet "${sheetName}" : Sheet Name start with "!"`);
 		return;
 	}
