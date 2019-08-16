@@ -146,6 +146,7 @@ export type SheetRow = {
 }
 export type SheetHeader = {
 	name: string, // name
+	shortName?: string, //shortName
 	stype: string, // type string
 	cIdx: number, // header idx
 	typeChecker: CTypeParser, // type checker

@@ -113,7 +113,15 @@ function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 			try {
 				col.parser = new CTypeParser(cell.w);
 				tmpArry.push(cell.w);
-				typeHeader.push({ name: col.name, cIdx: col.cIdx, typeChecker: col.parser, stype: cell.w, comment: false, color: col.color });
+				typeHeader.push({
+					name: col.name,
+					shortName: utils.FMT26.NumToS26(typeHeader.length),
+					cIdx: col.cIdx,
+					typeChecker: col.parser,
+					stype: cell.w,
+					comment: false,
+					color: col.color
+				});
 			} catch (ex) {
 				// new CTypeParser(cell.w); // for debug used
 				utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" Sheet Type Row`
@@ -172,7 +180,7 @@ function HandleWorkSheetNameColumn(worksheet: xlsx.WorkSheet,
 		if (firstCell.w[0] == '#') {
 			continue;
 		}
-		const tmpArry:any[] = [];
+		const tmpArry: any[] = [];
 		for (let cIdx = 0; cIdx <= ColumnMax; ++cIdx) {
 			const cell = GetCellData(worksheet, cIdx, rIdx);
 			if (cell == undefined || !utils.StrNotEmpty(cell.w) || cell.w[0] == '#') {
