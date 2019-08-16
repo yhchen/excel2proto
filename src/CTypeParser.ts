@@ -195,7 +195,7 @@ export class CTypeParser {
 	public get isArray(): boolean { return this._type.type == EType.array; }
 	public get DefaultValue(): any {
 		let r = TypeDefaultValue.get(this._type.typename);
-		return (r !== undefined) ? r.v : undefined;
+		return (r !== undefined) ? r.v : (this._type.type == EType.array ? [] : undefined);
 	}
 	public get SDefaultValue(): string {
 		let r = TypeDefaultValue.get(this._type.typename);

@@ -69,8 +69,9 @@
             "type": "lua",
             "OutputDir": "./test/exports/lua/",
             "GroupFilter": ["ALL"],
-            "ExportTemple": "{name}={data}",
-            "UseDefaultValueIfEmpty": false
+            "ExportTemple": "local {name} = {data}\n\nreturn {name}",
+            "UseDefaultValueIfEmpty": false,
+            "UseShortName": true
         },
         {
             "type": "lua",

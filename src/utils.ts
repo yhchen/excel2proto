@@ -146,7 +146,7 @@ export type SheetRow = {
 }
 export type SheetHeader = {
 	name: string, // name
-	shortName?: string, //shortName
+	shortName: string, //shortName
 	stype: string, // type string
 	cIdx: number, // header idx
 	typeChecker: CTypeParser, // type checker
@@ -219,6 +219,7 @@ export type ExportCfg = {
 	GroupFilter: Array<string>;
 	ExportTemple?: string;
 	ExtName?: string;
+	UseShortName?: boolean;
 }
 // export template
 export abstract class IExportWrapper {
