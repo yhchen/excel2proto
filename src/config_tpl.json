@@ -49,14 +49,14 @@
             "type": "tsd",
             "OutputDir": "./test/exports/global.d.ts",
             "GroupFilter": ["GREEN", "YELLOW", "RED"],
-            "ExportTemple": "export namespace GConfig {\n\n{data}export type Cfg = {type}\n\n}",
+            "ExportTemple": "declare namespace GConfig {\n\n{data}export type Cfg = {type}\n\n}",
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "tsd",
             "OutputDir": "./test/exports/tsd/",
             "GroupFilter": ["ALL"],
-            "ExportTemple": "export {data}export {type}",
+            "ExportTemple": "declare {data}declare {type}",
             "UseDefaultValueIfEmpty": true
         },
         {
@@ -76,7 +76,7 @@
         {
             "type": "lua",
             "OutputDir": "./test/exports/global.lua",
-            "GroupFilter": ["ALL"],
+            "GroupFilter": ["RED"],
             "ExportTemple": "GConfig = {data}",
             "UseDefaultValueIfEmpty": true
         }
