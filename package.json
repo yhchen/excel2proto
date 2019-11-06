@@ -5,7 +5,7 @@
   "main": "bin/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "update_package": "npm uninstall --save xlsx chalk fs-extra-promise json_to_lua moment && npm uninstall --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript && npm install --save xlsx chalk fs-extra-promise json_to_lua moment && npm install --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript"
+    "update_package": "npm uninstall --save xlsx chalk fs-extra-promise json_to_lua moment lodash && npm uninstall --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript && npm install --save xlsx chalk fs-extra-promise json_to_lua moment && npm install --save-dev @types/chalk @types/fs-extra-promise @types/lodash @types/moment @types/node @types/xlsx typescript"
   },
   "author": "yhchen",
   "license": "MIT",

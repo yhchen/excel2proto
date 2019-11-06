@@ -58,7 +58,7 @@ class TSDExport extends utils.IExportWrapper {
 		if (!ctx)
 			return true;
 		let interfaceContent = FMT.replace('{data}', ctx.type).replace('{type}', ctx.tbtype);
-		const outfile = outdir + dt.name + this._exportCfg.ExtName;
+		const outfile = path.join(outdir, dt.name + this._exportCfg.ExtName);
 		await fs.writeFileAsync(outfile, interfaceContent, { encoding: 'utf8', flag: 'w' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
 			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
