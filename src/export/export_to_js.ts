@@ -17,7 +17,12 @@ function ParseJSLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow,
 			}
 		}
 	}
-	rootNode[sheetRow.values[0]] = item;
+	const id = sheetRow.values[0];
+	rootNode[id] = item;
+	if (rootNode._ids == undefined) {
+		rootNode._ids = []
+	}
+	rootNode._ids.push(id);
 }
 
 function DumpToString(data: any) {

@@ -34,7 +34,7 @@
         {
             "type": "js",
             "OutputDir": "./test/exports/js/",
-            "GroupFilter": ["GREEN"],
+            "GroupFilter": ["GREEN", "RED", "ALL"],
             "ExportTemple": "export const {name}={data}",
             "UseDefaultValueIfEmpty": false
         },
