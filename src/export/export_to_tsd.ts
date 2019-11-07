@@ -144,6 +144,7 @@ class TSDExport extends utils.IExportWrapper {
 			case EType.array:
 				{
 					let tname = `[]`;
+					type = type.next;
 					for (; type != undefined; type = type.next) {
 						if (type.type == EType.array) {
 							tname += `[]`;
