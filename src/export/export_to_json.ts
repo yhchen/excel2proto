@@ -17,6 +17,10 @@ function ParseJsonLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRo
 		}
 	}
 	rootNode[sheetRow.values[0]] = item;
+	if (rootNode._ids == undefined) {
+		rootNode._ids = [];
+	}
+	rootNode._ids.push(sheetRow.values[0]);
 }
 
 
