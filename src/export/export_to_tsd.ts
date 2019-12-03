@@ -3,23 +3,23 @@ import * as path from "path";
 import * as utils from "../utils";
 import { ETypeNames, CType, EType } from "../CTypeParser";
 
-const TSTypeTranslateMap = new Map<ETypeNames, {s:string, opt:boolean}>([
-	[ETypeNames.char,		{s:'number', opt:false}],
-	[ETypeNames.uchar,		{s:'number', opt:false}],
-	[ETypeNames.short,		{s:'number', opt:false}],
-	[ETypeNames.ushort,		{s:'number', opt:false}],
-	[ETypeNames.int,		{s:'number', opt:false}],
-	[ETypeNames.uint,		{s:'number', opt:false}],
-	[ETypeNames.int64,		{s:'number', opt:false}],
-	[ETypeNames.uint64,		{s:'number', opt:false}],
-	[ETypeNames.string,		{s:'string', opt:false}],
-	[ETypeNames.double,		{s:'number', opt:false}],
-	[ETypeNames.float,		{s:'number', opt:false}],
-	[ETypeNames.bool,		{s:'boolean', opt:false}],
-	[ETypeNames.date,		{s:'string', opt:true}],
-	[ETypeNames.tinydate,	{s:'string', opt:true}],
-	[ETypeNames.timestamp,	{s:'number', opt:true}],
-	[ETypeNames.utctime,	{s:'number', opt:true}],
+const TSTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean }>([
+	[ETypeNames.char, { s: 'number', opt: false }],
+	[ETypeNames.uchar, { s: 'number', opt: false }],
+	[ETypeNames.short, { s: 'number', opt: false }],
+	[ETypeNames.ushort, { s: 'number', opt: false }],
+	[ETypeNames.int, { s: 'number', opt: false }],
+	[ETypeNames.uint, { s: 'number', opt: false }],
+	[ETypeNames.int64, { s: 'number', opt: false }],
+	[ETypeNames.uint64, { s: 'number', opt: false }],
+	[ETypeNames.string, { s: 'string', opt: false }],
+	[ETypeNames.double, { s: 'number', opt: false }],
+	[ETypeNames.float, { s: 'number', opt: false }],
+	[ETypeNames.bool, { s: 'boolean', opt: false }],
+	[ETypeNames.date, { s: 'string', opt:  true }],
+	[ETypeNames.tinydate, { s: 'string', opt:  true }],
+	[ETypeNames.timestamp, { s: 'number', opt:  true }],
+	[ETypeNames.utctime, { s: 'number', opt:  true }],
 ]);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ class TSDExport extends utils.IExportWrapper {
 			let ctx = this.GenSheetType(name, iter[1].arrTypeHeader);
 			if (ctx) {
 				data += `${exportexp}${ctx.type}${exportexp}${ctx.tbtype}\n\n`;
-				type += `\t${name}:T${name};\n`;
+				type += `\t${name}: T${name};\n`;
 			}
 		}
 		type += `}\n`;
