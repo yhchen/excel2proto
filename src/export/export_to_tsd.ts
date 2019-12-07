@@ -95,7 +95,7 @@ class TSDExport extends utils.IExportWrapper {
 			let ctx = this.GenSheetType(name, iter[1].arrTypeHeader);
 			if (ctx) {
 				data += `${exportexp}${ctx.type}${exportexp}${ctx.tbtype}\n\n`;
-				type += `\t${name}: T${name};\n`;
+				type += `    ${name}: T${name};\n`;
 			}
 		}
 		type += `}\n`;
@@ -117,7 +117,7 @@ class TSDExport extends utils.IExportWrapper {
 		let type = `type ${sheetName} = {\n`;
 		for (let header of arrExportHeader) {
 			if (header.comment) continue;
-			type += `\t${header.name}${this.GenTypeName(header.typeChecker.type, false)};\n`;
+			type += `    ${header.name}${this.GenTypeName(header.typeChecker.type, false)};\n`;
 		}
 		type += '}\n';
 		let tbtype = `type T${sheetName} = {[Key in number|string]?: ${sheetName}};\n`
