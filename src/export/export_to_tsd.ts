@@ -16,10 +16,10 @@ const TSTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean }>([
 	[ETypeNames.double, { s: 'number', opt: false }],
 	[ETypeNames.float, { s: 'number', opt: false }],
 	[ETypeNames.bool, { s: 'boolean', opt: false }],
-	[ETypeNames.date, { s: 'string', opt:  true }],
-	[ETypeNames.tinydate, { s: 'string', opt:  true }],
-	[ETypeNames.timestamp, { s: 'number', opt:  true }],
-	[ETypeNames.utctime, { s: 'number', opt:  true }],
+	[ETypeNames.date, { s: 'string', opt: true }],
+	[ETypeNames.tinydate, { s: 'string', opt: true }],
+	[ETypeNames.timestamp, { s: 'number', opt: true }],
+	[ETypeNames.utctime, { s: 'number', opt: true }],
 ]);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,9 +90,16 @@ class TSDExport extends utils.IExportWrapper {
 		let data = '';
 		let type = '{\n';
 		const exportexp = FMT.indexOf('export') >= 0 ? 'export ' : '';
-		for (let iter of utils.ExportExcelDataMap) {
-			const name = iter[1].name;
-			let ctx = this.GenSheetType(name, iter[1].arrTypeHeader);
+		const array = [];
+		for (let [k, v] of utils.ExportExcelDataMap) {
+			array.push(v);
+		}
+		array.sort((a, b) => {
+			return a.name.localeCompare(b.name);
+		});
+		for (let db of array) {
+			const name = db.name;
+			let ctx = this.GenSheetType(name, db.arrTypeHeader);
 			if (ctx) {
 				data += `${exportexp}${ctx.type}${exportexp}${ctx.tbtype}\n\n`;
 				type += `    ${name}: T${name};\n`;
