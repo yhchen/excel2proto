@@ -115,7 +115,7 @@ function HandleHighLevelTypeCheck(): boolean {
 				if (row.type != utils.ESheetRowType.data) continue;
 				const data = row.values[colIdx];
 
-				if (!data) continue;
+				// if (!data) continue;
 				try {
 					if (!header.highCheck.checkType(data, row.values, database.arrHeaderNameMap)) {
 						throw '';

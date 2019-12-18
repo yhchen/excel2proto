@@ -21,11 +21,13 @@ const enums = {
 // ?????????? check function add below ??????????
 const checker = {
 	CheckItem: function (data) {
+		if (!data) return true;
 		return Item.checkColumnContainsValue('id', data[0]);
 	},
 
 	// check item config valid
 	CheckAward: function (data) {
+		if (!data) return true;
 		switch (data[0]) {
 			case enums.EItemType.Item:
 				return Item.checkColumnContainsValue('id', data[1]);

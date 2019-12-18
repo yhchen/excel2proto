@@ -52,6 +52,7 @@ class CTypeGenerator {
 		}
 		const func = this._func;
 		this._func = (value: any, row, headerNameMap): boolean => {
+			if (!value) return true;
 			for (const v of value) {
 				if (!func(v, row, headerNameMap)) {
 					return false;
