@@ -38,7 +38,7 @@ const checker = {
 
 // @return: row['name']
 function getDataByColName(row, headerNameMap, name) {
-	let idx = headerNameMap.get(name);
+	const idx = headerNameMap.get(name);
 	if (idx === undefined) {
 		throw `type extens checker failure. column name ${name} not found!`;
 	}
