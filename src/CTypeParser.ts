@@ -100,6 +100,9 @@ console.log(`[TypeParser] : Default Date format is "${DateFmt}"`);
 let TinyDateFMT: string = 'YYYY/MM/DD';
 console.log(`[TypeParser] : Default Tiny Date format is "${TinyDateFMT}"`);
 
+let TimeStampUseMS = false;
+console.log(`[TypeParser] : Default Timestamp use "${TimeStampUseMS ? "ms" : "second"}"`);
+
 const TimeZoneOffset = new Date().getTimezoneOffset() * 60;
 console.log(`[TypeParser] : Time zone offset is "${TimeZoneOffset}"`);
 
@@ -108,14 +111,14 @@ let FractionDigitsFMT = 6;
 console.log(`[TypeParser] : Default Float PrecisionFMT count is "${FractionDigitsFMT}"`);
 
 // number type range
-const NumberRangeMap = new Map<string, {min:number, max:number}>([
-		['char',	{ min:-127,			max:127 }],
-		['uchar',	{ min:0,			max:255 }],
-		['short',	{ min:-32768,		max:32767 }],
-		['ushort',	{ min:0,			max:65535 }],
-		['int',		{ min:-2147483648,	max:2147483647 }],
-		['uint',	{ min:0,			max:4294967295 }],
-	]);
+const NumberRangeMap = new Map<string, { min: number, max: number }>([
+	['char', { min: -127, max: 127 }],
+	['uchar', { min: 0, max: 255 }],
+	['short', { min: -32768, max: 32767 }],
+	['ushort', { min: 0, max: 65535 }],
+	['int', { min: -2147483648, max: 2147483647 }],
+	['uint', { min: 0, max: 4294967295 }],
+]);
 
 const BooleanKeyMap = new Map<string, boolean>([['true', true], ['false', false], ['0', false], ['1', true],]);
 
@@ -130,28 +133,28 @@ function CheckNumberInRange(n: number, type: CType): boolean {
 
 // type name enum
 export enum ETypeNames {
-	char		=	'char',			uchar		=	'uchar',
-	short		=	'short',		ushort		=	'ushort',
-	int			=	'int',			uint		=	'uint',
-	int64		=	'int64',		uint64		=	'uint64',
-	string		=	'string',
-	double		=	'double',		float		=	'float',
-	bool		=	'bool',
-	vector2		=	'vector2',		vector3		=	'vector3',
-	date		=	'date',			tinydate	=	'tinydate',
-	timestamp	=	'timestamp',	utctime		=	'utctime',
+	char = 'char', uchar = 'uchar',
+	short = 'short', ushort = 'ushort',
+	int = 'int', uint = 'uint',
+	int64 = 'int64', uint64 = 'uint64',
+	string = 'string',
+	double = 'double', float = 'float',
+	bool = 'bool',
+	vector2 = 'vector2', vector3 = 'vector3',
+	date = 'date', tinydate = 'tinydate',
+	timestamp = 'timestamp', utctime = 'utctime',
 };
 
-const TypeDefaultValue = new Map<ETypeNames|undefined, {w:string, v:any}>([
-	[ ETypeNames.char, {w:'0',v:0} ],				[ ETypeNames.uchar, {w:'0',v:0} ],
-	[ ETypeNames.short, {w:'0',v:0} ],				[ ETypeNames.ushort, {w:'0',v:0} ],
-	[ ETypeNames.int, {w:'0',v:0} ],				[ ETypeNames.uint, {w:'0',v:0} ],
-	[ ETypeNames.int64, {w:'0',v:0} ],				[ ETypeNames.uint64, {w:'0',v:0} ],
-	[ ETypeNames.string, {w:'',v:''} ],
-	[ ETypeNames.double, {w:'0',v:0} ],				[ ETypeNames.float, {w:'0',v:0} ],
-	[ ETypeNames.bool, {w:'false',v:false} ],
-	[ ETypeNames.date, {w:'',v:''} ],				[ ETypeNames.tinydate, {w:'',v:''} ],
-	[ ETypeNames.timestamp, {w:'0',v:0} ],			[ ETypeNames.utctime, {w:'0',v:0} ],
+const TypeDefaultValue = new Map<ETypeNames | undefined, { w: string, v: any }>([
+	[ETypeNames.char, { w: '0', v: 0 }], [ETypeNames.uchar, { w: '0', v: 0 }],
+	[ETypeNames.short, { w: '0', v: 0 }], [ETypeNames.ushort, { w: '0', v: 0 }],
+	[ETypeNames.int, { w: '0', v: 0 }], [ETypeNames.uint, { w: '0', v: 0 }],
+	[ETypeNames.int64, { w: '0', v: 0 }], [ETypeNames.uint64, { w: '0', v: 0 }],
+	[ETypeNames.string, { w: '', v: '' }],
+	[ETypeNames.double, { w: '0', v: 0 }], [ETypeNames.float, { w: '0', v: 0 }],
+	[ETypeNames.bool, { w: 'false', v: false }],
+	[ETypeNames.date, { w: '', v: '' }], [ETypeNames.tinydate, { w: '', v: '' }],
+	[ETypeNames.timestamp, { w: '0', v: 0 }], [ETypeNames.utctime, { w: '0', v: 0 }],
 ]);
 
 // number type
@@ -207,6 +210,9 @@ export class CTypeParser {
 	// get and set Tiny Date Format
 	public static set TinyDateFmt(s: string) { TinyDateFMT = s; console.log(`[TypeParser] : Change Tiny Date format to "${TinyDateFMT}"`); }
 	public static get TinyDateFmt(): string { return TinyDateFMT; }
+	// get and set timestamp use second or ms
+	public static set TimeStampUseMS(s: boolean) { TimeStampUseMS = s; console.log(`[TypeParser] : Change Tiny Date format to "${TimeStampUseMS}"`); }
+	public static get TimeStampUseMS() { return TimeStampUseMS; }
 	// get and set Float Precision Format
 	public static set FractionDigitsFMT(v: number) { FractionDigitsFMT = v; console.log(`[TypeParser] : Change Float precision to "${FractionDigitsFMT}"`); }
 	public static get FractionDigitsFMT(): number { return FractionDigitsFMT; }
@@ -227,15 +233,15 @@ export class CTypeParser {
 		switch (this._type.type) {
 			case EType.array:
 				return _Parse(value.w, this._type);
-				// const tmpObj = JSON.parse(value.w);
-				// if (!isArray(tmpObj))
-				// 	throw `${value} is not a valid json type`;
-				// if (this._type.next == undefined)
-				// 	throw `type array next is undefined`;
-				// for (let i = 0; i < tmpObj.length; ++i) {
-				// 	tmpObj[i] = _Parse(tmpObj[i], this._type.next, 0);
-				// }
-				// return tmpObj;
+			// const tmpObj = JSON.parse(value.w);
+			// if (!isArray(tmpObj))
+			// 	throw `${value} is not a valid json type`;
+			// if (this._type.next == undefined)
+			// 	throw `type array next is undefined`;
+			// for (let i = 0; i < tmpObj.length; ++i) {
+			// 	tmpObj[i] = _Parse(tmpObj[i], this._type.next, 0);
+			// }
+			// return tmpObj;
 			case EType.base:
 				if (this._type.is_number) {
 					return _ParseNumber(<any>value.v || value.w || '', this._type);
@@ -334,8 +340,8 @@ function _ParseType(p: { s: string, idx: number }): CType | undefined {
 		if (!typescope) {
 			throw `gen type check error: base type not found!`;
 		}
-		const typename = p.s.substr(typescope.start, typescope.len);
-		if (!ETypeNames[<any>typename])
+		const typename = p.s.substr(typescope.start, typescope.len) as keyof typeof ETypeNames;
+		if (!ETypeNames[typename])
 			throw `gen type check error: base type = ${typename} not exist!`;
 		if (typename == ETypeNames.vector2 || typename == ETypeNames.vector3) {
 			thisNode = { type: EType.base, typename: ETypeNames.float, is_number: true };
@@ -375,7 +381,11 @@ function _ParseDate(date: any, type: CType): string | number {
 			case ETypeNames.utctime:
 				return (Math.round(date.getTime() / 1000 + TimeZoneOffset));
 			case ETypeNames.timestamp:
-				return (Math.round(date.getTime() / 1000));
+				if (TimeStampUseMS) {
+					return (Math.round(date.getTime() / 1000));
+				} else {
+					return (Math.round(date.getTime()));
+				}
 			case ETypeNames.date:
 				return moment.default(date).format(DateFmt);
 			case ETypeNames.tinydate:

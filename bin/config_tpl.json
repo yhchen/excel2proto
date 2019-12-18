@@ -84,6 +84,7 @@
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,
     "DateFmt": "YYYY/MM/DD HH:mm:ss",
     "TinyDateFmt": "YYYY/MM/DD",
+    "TimeStampUseMS": true,
     "LineBreak": "\r\n",
     "FractionDigitsFMT": 6,
     "EnableTypeCheck": true,
