@@ -180,6 +180,7 @@ export class SheetDataTable {
 	public name: string;
 	public filename: string;
 	public arrTypeHeader = new Array<SheetHeader>();
+	public arrHeaderNameMap = new Map<string, number>();
 	public arrValues = new Array<SheetRow>();
 
 	private makeColumnKeyMap(columnName: string): boolean {

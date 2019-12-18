@@ -102,7 +102,8 @@ function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 		}
 		firstCell.w = firstCell.w.substr(1); // skip '*'
 		const tmpArry = [];
-		let typeHeader = new Array<utils.SheetHeader>();
+		const typeHeader = new Array<utils.SheetHeader>();
+		const headerNameMap = new Map<string, number>();
 		for (const col of arrHeaderName) {
 			const cell = GetCellData(worksheet, col.cIdx, rIdx);
 			if (cell == undefined || cell.w == undefined) {
@@ -122,6 +123,7 @@ function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 					comment: false,
 					color: col.color
 				});
+				headerNameMap.set(col.name, col.cIdx);
 			} catch (ex) {
 				// new CTypeParser(cell.w); // for debug used
 				utils.exception(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" Sheet Type Row`
@@ -129,6 +131,7 @@ function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 			}
 		}
 		DataTable.arrTypeHeader = typeHeader;
+		DataTable.arrHeaderNameMap = headerNameMap;
 		DataTable.arrValues.push({ type: utils.ESheetRowType.type, values: tmpArry, cIdx: rIdx });
 		++rIdx;
 		break;

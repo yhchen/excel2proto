@@ -25,8 +25,8 @@ function InitEnv() {
 	}
 }
 
-type CheckFuncType = (value: any) => boolean;
-function defaultFunc(value: any): boolean {
+type CheckFuncType = (value: any, row: utils.SheetRow, headerNameMap: Map<string, number>) => boolean;
+function defaultFunc(value: any, row: utils.SheetRow, headerNameMap: Map<string, number>): boolean {
 	return true;
 }
 const KeySet = new Set([',', '[', ']']);
@@ -51,9 +51,9 @@ class CTypeGenerator {
 			this.setLstMode(false);
 		}
 		const func = this._func;
-		this._func = (value: any): boolean => {
+		this._func = (value: any, row, headerNameMap): boolean => {
 			for (const v of value) {
-				if (!func(v)) {
+				if (!func(v, row, headerNameMap)) {
 					return false;
 				}
 			}
@@ -67,9 +67,9 @@ class CTypeGenerator {
 		if (!this._lstMode) {
 			const lst = this._lst;
 			this._lst = []
-			this._func = (value: any): boolean => {
+			this._func = (value: any, row, headerNameMap): boolean => {
 				for (let i = 0; i < lst.length; ++i) {
-					if (!lst[i](value[i]))
+					if (!lst[i](value[i], row, headerNameMap))
 						return false;
 				}
 				return true;
@@ -81,7 +81,7 @@ class CTypeGenerator {
 		return this._func;
 	}
 	private _lst: CheckFuncType[] = [];
-	private _func: CheckFuncType = defaultFunc;
+	private _func = defaultFunc;
 	private _lstMode = false;
 }
 
@@ -99,7 +99,9 @@ export class CHightTypeChecker {
 
 	public get s() { return this._type; }
 
-	public checkType(obj: any): boolean { return this._checkFunc(obj); }
+	public checkType(obj: any, row: utils.SheetRow, headerNameMap: Map<string, number>): boolean {
+		return this._checkFunc(obj, row, headerNameMap);
+	}
 
 	private initInner(generator: CTypeGenerator, s: string, idx: number) {
 		for (let i = idx; i < s.length; ++i) {
