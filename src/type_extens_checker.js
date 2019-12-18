@@ -44,7 +44,7 @@ function getDataByColName(row, headerNameMap, name) {
 	if (idx === undefined) {
 		throw `type extens checker failure. column name ${name} not found!`;
 	}
-	return row[idx];
+	return row[idx - 1];
 }
 
 exports.enums = enums;
