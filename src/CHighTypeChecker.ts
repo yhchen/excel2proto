@@ -25,8 +25,8 @@ function InitEnv() {
 	}
 }
 
-type CheckFuncType = (value: any, row: utils.SheetRow, headerNameMap: Map<string, number>) => boolean;
-function defaultFunc(value: any, row: utils.SheetRow, headerNameMap: Map<string, number>): boolean {
+type CheckFuncType = (value: any, rowDatas: Array<any>, headerNameMap: Map<string, number>) => boolean;
+function defaultFunc(value: any, rowDatas: Array<any>, headerNameMap: Map<string, number>): boolean {
 	return true;
 }
 const KeySet = new Set([',', '[', ']']);
@@ -99,8 +99,8 @@ export class CHightTypeChecker {
 
 	public get s() { return this._type; }
 
-	public checkType(obj: any, row: utils.SheetRow, headerNameMap: Map<string, number>): boolean {
-		return this._checkFunc(obj, row, headerNameMap);
+	public checkType(obj: any, rowDatas: Array<any>, headerNameMap: Map<string, number>): boolean {
+		return this._checkFunc(obj, rowDatas, headerNameMap);
 	}
 
 	private initInner(generator: CTypeGenerator, s: string, idx: number) {

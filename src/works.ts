@@ -117,7 +117,7 @@ function HandleHighLevelTypeCheck(): boolean {
 
 				if (!data) continue;
 				try {
-					if (!header.highCheck.checkType(data, row, database.arrHeaderNameMap)) {
+					if (!header.highCheck.checkType(data, row.values, database.arrHeaderNameMap)) {
 						throw '';
 					}
 				} catch (ex) {
