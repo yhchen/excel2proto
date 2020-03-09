@@ -89,6 +89,7 @@
             "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
             "UseDefaultValueIfEmpty": false,
             "Namespace": "Hotfix",
+            "UseNamespace": ["ETModel", "ddd"],
             "NameTranslate": { "Id": "_id" },
             "IDUseGeterAndSeter": true, "cm01": "only support for c#",
             "UseShortName": true
@@ -99,10 +100,18 @@
             "GroupFilter": ["ALL"],
             "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
             "Namespace": "Hotfix",
+            "UseNamespace": ["ETModel", "ddd"],
             "UseDefaultValueIfEmpty": false,
             "IDUseGeterAndSeter": true, "cm01": "only support for c#",
             "NameTranslate": { "Id": "_id" },
             "UseShortName": true
+        },
+        {
+            "type": "jsonline",
+            "OutputDir": "./test/exports/jsonline/",
+            "GroupFilter": ["ALL"],
+            "NameTranslate": { "Id": "_id" },
+            "UseDefaultValueIfEmpty": false
         }
     ],
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,

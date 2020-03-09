@@ -63,6 +63,13 @@ class CSDExport extends utils.IExportWrapper {
 			}
 			interfaceContent = `namespace ${this._exportCfg.Namespace}${LineB}{${LineB}\t${interfaceContent}${LineB}}${LineB}`;
 		}
+		if (this._exportCfg.UseNamespace) {
+			let allUseNameSpace = '';
+			for (let nameSpace of this._exportCfg.UseNamespace) {
+				allUseNameSpace += `using ${nameSpace};${LineB}`
+			}
+			interfaceContent = `${allUseNameSpace}${LineB}${interfaceContent}`
+		}
 		const outfile = path.join(outdir, dt.name + this._exportCfg.ExtName);
 		await fs.writeFileAsync(outfile, interfaceContent, { encoding: 'utf8', flag: 'w' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outfile)}". `
@@ -112,6 +119,13 @@ class CSDExport extends utils.IExportWrapper {
 		if (this._exportCfg.Namespace) {
 			interfaceContent = interfaceContent.split(LineB).join(`${LineB}\t`);
 			interfaceContent = `namespace ${this._exportCfg.Namespace}${LineB}{${LineB}\t${interfaceContent}${LineB}}${LineB}`;
+		}
+		if (this._exportCfg.UseNamespace) {
+			let allUseNameSpace = '';
+			for (let nameSpace of this._exportCfg.UseNamespace) {
+				allUseNameSpace += `using ${nameSpace};${LineB}`
+			}
+			interfaceContent = `${allUseNameSpace}${LineB}${interfaceContent}`
 		}
 		await fs.writeFileAsync(outdir, interfaceContent, { encoding: 'utf8', flag: 'w' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `

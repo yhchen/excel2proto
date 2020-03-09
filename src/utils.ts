@@ -225,6 +225,7 @@ export type ExportCfg = {
 	Namespace?: string; // for csharp
 	IDUseGeterAndSeter?: boolean;
 	UseShortName?: boolean;
+	UseNamespace?:Array<string>;
 }
 // export template
 export abstract class IExportWrapper {
@@ -327,6 +328,7 @@ export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['js', require('./export/export_to_js')],
 	['tsd', require('./export/export_to_tsd')],
 	['lua', require('./export/export_to_lua')],
+	['jsonline', require('./export/export_to_json_line')],
 ]);
 
 //#endregion
