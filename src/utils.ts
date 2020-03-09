@@ -218,6 +218,7 @@ export type ExportCfg = {
 	type: string;
 	OutputDir: string;
 	UseDefaultValueIfEmpty: boolean;
+	NameTranslate?: { [key: string]: string }; // translate name to target name
 	GroupFilter: Array<string>;
 	ExportTemple?: string;
 	ExtName?: string;
@@ -230,6 +231,14 @@ export abstract class IExportWrapper {
 		this._exportCfg = exportCfg;
 	}
 	public abstract get DefaultExtName(): string;
+	// translate col name to target name
+	public TranslateColName(name: string): string {
+		if (!this._exportCfg.NameTranslate) {
+			return name;
+		}
+		const newName = this._exportCfg.NameTranslate[name];
+		return newName ?? name;
+	}
 	public async ExportToAsync(dt: SheetDataTable, endCallBack: (ok: boolean) => void): Promise<boolean> {
 		let ok = false;
 		try {

@@ -129,7 +129,7 @@ class CSDExport extends utils.IExportWrapper {
 		let data = `{${utils.LineBreaker}`;
 		for (let header of arrExportHeader) {
 			if (header.comment) continue;
-			data += `\tpublic ${this.GenTypeName(header.typeChecker.type, false)} ${header.name};${utils.LineBreaker}`;
+			data += `\tpublic ${this.GenTypeName(header.typeChecker.type, false)} ${this.TranslateColName(header.name)};${utils.LineBreaker}`;
 		}
 		data += `}${utils.LineBreaker}`;
 		return data;

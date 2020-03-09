@@ -2,28 +2,6 @@ import * as path from 'path';
 import * as fs from "fs-extra-promise";
 import * as utils from "../utils";
 
-function ParseJsonLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, exportCfg: utils.ExportCfg) {
-	if (sheetRow.type != utils.ESheetRowType.data)
-		return;
-	let item: any = {};
-	for (let i = 0; i < header.length && i < sheetRow.values.length; ++i) {
-		if (!header[i] || header[i].comment) continue;
-		if (sheetRow.values[i] != null) {
-			item[header[i].name] = sheetRow.values[i];
-		} else if (exportCfg.UseDefaultValueIfEmpty) {
-			if (header[i].typeChecker.DefaultValue != undefined) {
-				item[header[i].name] = header[i].typeChecker.DefaultValue;
-			}
-		}
-	}
-	rootNode[sheetRow.values[0]] = item;
-	if (rootNode._ids == undefined) {
-		rootNode._ids = [];
-	}
-	rootNode._ids.push(sheetRow.values[0]);
-}
-
-
 class JSONExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
 
@@ -37,7 +15,7 @@ class JSONExport extends utils.IExportWrapper {
 			return true;
 		}
 		for (let row of dt.arrValues) {
-			ParseJsonLine(arrExportHeader, row, jsonObj, this._exportCfg);
+			this.ParseJsonLine(arrExportHeader, row, jsonObj, this._exportCfg);
 		}
 		if (this.IsFile(outdir)) {
 			this._globalObj[dt.name] = jsonObj;
@@ -69,6 +47,28 @@ class JSONExport extends utils.IExportWrapper {
 			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
 		return true;
 	}
+
+	private ParseJsonLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, exportCfg: utils.ExportCfg) {
+		if (sheetRow.type != utils.ESheetRowType.data)
+			return;
+		let item: any = {};
+		for (let i = 0; i < header.length && i < sheetRow.values.length; ++i) {
+			if (!header[i] || header[i].comment) continue;
+			if (sheetRow.values[i] != null) {
+				item[this.TranslateColName(header[i].name)] = sheetRow.values[i];
+			} else if (exportCfg.UseDefaultValueIfEmpty) {
+				if (header[i].typeChecker.DefaultValue != undefined) {
+					item[this.TranslateColName(header[i].name)] = header[i].typeChecker.DefaultValue;
+				}
+			}
+		}
+		rootNode[sheetRow.values[0]] = item;
+		if (rootNode._ids == undefined) {
+			rootNode._ids = [];
+		}
+		rootNode._ids.push(sheetRow.values[0]);
+	}
+	
 
 	private _globalObj: any = {};
 }

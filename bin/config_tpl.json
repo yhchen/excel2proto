@@ -22,13 +22,15 @@
             "type": "json",
             "OutputDir": "./test/exports/json/",
             "GroupFilter": ["YELLOW"],
+            "NameTranslate": { "Id": "_id" },
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "json",
             "OutputDir": "./test/exports/json-bytes.bytes",
-            "GroupFilter": ["RED"],
+            "GroupFilter": ["ALL"],
             "ExtName": ".bytes",
+            "NameTranslate": { "Id": "_id" },
             "UseDefaultValueIfEmpty": false
         },
         {
@@ -87,6 +89,7 @@
             "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
             "UseDefaultValueIfEmpty": false,
             "Namespace": "Hotfix",
+            "NameTranslate": { "Id": "_id" },
             "UseShortName": true
         },
         {
@@ -96,6 +99,7 @@
             "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
             "Namespace": "Hotfix",
             "UseDefaultValueIfEmpty": false,
+            "NameTranslate": { "Id": "_id" },
             "UseShortName": true
         }
     ],
