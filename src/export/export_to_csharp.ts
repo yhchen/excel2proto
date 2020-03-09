@@ -53,7 +53,8 @@ class CSDExport extends utils.IExportWrapper {
 		let data = this.GenSheetType(dt.name, dt.arrTypeHeader);
 		if (!data)
 			return true;
-		let interfaceContent = FMT.replace('{data}', data).replace('{name}', dt.name);
+		const nameReg = new RegExp('{name}', 'gm');
+		let interfaceContent = FMT.replace('{data}', data).replace(nameReg, dt.name);
 		if (this._exportCfg.Namespace) {
 			interfaceContent = interfaceContent.split('\n').join('\n\t');
 			interfaceContent = `namespace ${this._exportCfg.Namespace}\n{\n\t${interfaceContent}\n}\n`;
@@ -95,7 +96,8 @@ class CSDExport extends utils.IExportWrapper {
 			const name = db.name;
 			let data = this.GenSheetType(name, db.arrTypeHeader);
 			if (data) {
-				interfaceContent += FMT.replace('{data}', data).replace('{name}', name);
+				const nameReg = new RegExp('{name}', 'gm');
+				interfaceContent += FMT.replace('{data}', data).replace(nameReg, name);
 			}
 		}
 		if (this._exportCfg.Namespace) {
