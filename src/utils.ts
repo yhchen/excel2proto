@@ -220,6 +220,7 @@ export type ExportCfg = {
 	GroupFilter: Array<string>;
 	ExportTemple?: string;
 	ExtName?: string;
+	Namespace?: string; // for csharp
 	UseShortName?: boolean;
 }
 // export template
@@ -310,6 +311,7 @@ export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<S
 export type ExportWrapperFactory = (cfg: ExportCfg) => IExportWrapper;
 export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['csv', require('./export/export_to_csv')],
+	['csharp', require('./export/export_to_csharp')],
 	['json', require('./export/export_to_json')],
 	['js', require('./export/export_to_js')],
 	['tsd', require('./export/export_to_tsd')],

@@ -79,6 +79,24 @@
             "GroupFilter": ["RED"],
             "ExportTemple": "GConfig = {data}",
             "UseDefaultValueIfEmpty": true
+        },
+        {
+            "type": "csharp",
+            "OutputDir": "./test/exports/csharp/",
+            "GroupFilter": ["ALL"],
+            "ExportTemple": "public class {name}: IConfig\n{data}",
+            "UseDefaultValueIfEmpty": false,
+            "Namespace": "Hotfix",
+            "UseShortName": true
+        },
+        {
+            "type": "csharp",
+            "OutputDir": "./test/exports/csharp.cs",
+            "GroupFilter": ["ALL"],
+            "ExportTemple": "public class {name}: IConfig\n{data}\n",
+            "Namespace": "Hotfix",
+            "UseDefaultValueIfEmpty": false,
+            "UseShortName": true
         }
     ],
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,
