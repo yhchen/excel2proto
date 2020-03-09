@@ -1,7 +1,7 @@
 import * as fs from "fs-extra-promise";
 import * as path from "path";
 import * as utils from "../utils";
-import { ETypeNames, CType, EType } from "../CTypeParser";
+import { ETypeNames, CType, EType, CTypeParser } from "../CTypeParser";
 
 const CSTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean }>([
 	[ETypeNames.char, { s: 'char', opt: false }],
@@ -32,6 +32,7 @@ class CSDExport extends utils.IExportWrapper {
 
 	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		let outdir = this._exportCfg.OutputDir;
+		const LineB = utils.LineBreaker;
 
 		if (this.IsFile(outdir)) {
 			return true;
@@ -56,8 +57,11 @@ class CSDExport extends utils.IExportWrapper {
 		const nameReg = new RegExp('{name}', 'gm');
 		let interfaceContent = FMT.replace('{data}', data).replace(nameReg, dt.name);
 		if (this._exportCfg.Namespace) {
-			interfaceContent = interfaceContent.split('\n').join('\n\t');
-			interfaceContent = `namespace ${this._exportCfg.Namespace}\n{\n\t${interfaceContent}\n}\n`;
+			interfaceContent = interfaceContent.split(LineB).join(`${LineB}\t`);
+			if (dt.customData && CTypeParser.CustomDataNode) {
+				interfaceContent = interfaceContent.replace('{customData}', dt.customData);
+			}
+			interfaceContent = `namespace ${this._exportCfg.Namespace}${LineB}{${LineB}\t${interfaceContent}${LineB}}${LineB}`;
 		}
 		const outfile = path.join(outdir, dt.name + this._exportCfg.ExtName);
 		await fs.writeFileAsync(outfile, interfaceContent, { encoding: 'utf8', flag: 'w' });
@@ -68,6 +72,7 @@ class CSDExport extends utils.IExportWrapper {
 
 	protected async ExportGlobal(): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
+		const LineB = utils.LineBreaker;
 		if (!this.IsFile(outdir))
 			return true;
 		if (!this.CreateDir(path.dirname(outdir))) {
@@ -97,12 +102,16 @@ class CSDExport extends utils.IExportWrapper {
 			let data = this.GenSheetType(name, db.arrTypeHeader);
 			if (data) {
 				const nameReg = new RegExp('{name}', 'gm');
-				interfaceContent += FMT.replace('{data}', data).replace(nameReg, name);
+				let ctx = FMT.replace('{data}', data).replace(nameReg, name);
+				if (db.customData && CTypeParser.CustomDataNode) {
+					ctx = ctx.replace('{customData}', db.customData);
+				}
+				interfaceContent += ctx;
 			}
 		}
 		if (this._exportCfg.Namespace) {
-			interfaceContent = interfaceContent.split('\n').join('\n\t');
-			interfaceContent = `namespace ${this._exportCfg.Namespace}\n{\n\t${interfaceContent}\n}\n`;
+			interfaceContent = interfaceContent.split(LineB).join(`${LineB}\t`);
+			interfaceContent = `namespace ${this._exportCfg.Namespace}${LineB}{${LineB}\t${interfaceContent}${LineB}}${LineB}`;
 		}
 		await fs.writeFileAsync(outdir, interfaceContent, { encoding: 'utf8', flag: 'w' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
@@ -117,12 +126,12 @@ class CSDExport extends utils.IExportWrapper {
 			return;
 		}
 
-		let data = `{\n`;
+		let data = `{${utils.LineBreaker}`;
 		for (let header of arrExportHeader) {
 			if (header.comment) continue;
-			data += `\tpublic ${this.GenTypeName(header.typeChecker.type, false)} ${header.name};\n`;
+			data += `\tpublic ${this.GenTypeName(header.typeChecker.type, false)} ${header.name};${utils.LineBreaker}`;
 		}
-		data += '}\n';
+		data += `}${utils.LineBreaker}`;
 		return data;
 	}
 

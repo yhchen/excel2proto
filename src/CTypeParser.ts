@@ -106,6 +106,9 @@ console.log(`[TypeParser] : Default Timestamp use "${TimeStampUseMS ? "ms" : "se
 const TimeZoneOffset = new Date().getTimezoneOffset() * 60;
 console.log(`[TypeParser] : Time zone offset is "${TimeZoneOffset}"`);
 
+let CustomDataNode: string;
+console.log(`[TypeParser] : Default CustomDataNode "<undefined>"`);
+
 // float precision count
 let FractionDigitsFMT = 6;
 console.log(`[TypeParser] : Default Float PrecisionFMT count is "${FractionDigitsFMT}"`);
@@ -216,6 +219,10 @@ export class CTypeParser {
 	// get and set Float Precision Format
 	public static set FractionDigitsFMT(v: number) { FractionDigitsFMT = v; console.log(`[TypeParser] : Change Float precision to "${FractionDigitsFMT}"`); }
 	public static get FractionDigitsFMT(): number { return FractionDigitsFMT; }
+
+	// get and set custom data node
+	public static set CustomDataNode(s: string) { CustomDataNode = s; console.log(`[TypeParser] : Custom Data Node "${CustomDataNode}"`); }
+	public static get CustomDataNode() { return CustomDataNode; }
 
 	public CheckContentVaild(tmpObj: any): boolean {
 		if (tmpObj == undefined || NullStr(tmpObj)) {

@@ -84,7 +84,7 @@
             "type": "csharp",
             "OutputDir": "./test/exports/csharp/",
             "GroupFilter": ["ALL"],
-            "ExportTemple": "public class {name}: IConfig\n{data}",
+            "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
             "UseDefaultValueIfEmpty": false,
             "Namespace": "Hotfix",
             "UseShortName": true
@@ -93,7 +93,7 @@
             "type": "csharp",
             "OutputDir": "./test/exports/csharp.cs",
             "GroupFilter": ["ALL"],
-            "ExportTemple": "public class {name}: IConfig\n{data}\n",
+            "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
             "Namespace": "Hotfix",
             "UseDefaultValueIfEmpty": false,
             "UseShortName": true
@@ -103,6 +103,7 @@
     "DateFmt": "YYYY/MM/DD HH:mm:ss",
     "TinyDateFmt": "YYYY/MM/DD",
     "TimeStampUseMS": true,
+    "CustomDataNode": "B1",
     "LineBreak": "\r\n",
     "FractionDigitsFMT": 6,
     "EnableTypeCheck": true,

@@ -1,6 +1,6 @@
 {
   "name": "excel_tiny_wrapper",
-  "version": "2.6.1",
+  "version": "2.7.1",
   "description": "excel export with type check using nodejs in super fast speed!",
   "main": "bin/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "@types/moment": "^2.13.0",
     "@types/node": "^12.7.1",
     "@types/xlsx": "0.0.36",
-    "typescript": "^3.5.3"
+    "typescript": "^3.8.3"
   },
   "repository": {
     "type": "git",

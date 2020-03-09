@@ -38,6 +38,7 @@ export function InitGlobalConfig(fpath: string = ''): boolean {
 	CTypeParser.DateFmt = gCfg.DateFmt;
 	CTypeParser.TinyDateFmt = gCfg.TinyDateFmt;
 	CTypeParser.TimeStampUseMS = gCfg.TimeStampUseMS;
+	CTypeParser.CustomDataNode = gCfg.CustomDataNode;
 	CTypeParser.FractionDigitsFMT = gCfg.FractionDigitsFMT;
 
 	return true;

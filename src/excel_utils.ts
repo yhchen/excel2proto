@@ -271,6 +271,15 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 	// find max column and rows
 	let rIdx = 0;
 	const DataTable = new utils.SheetDataTable(sheetName, fileName);
+	// handle custom data
+	if (CTypeParser.CustomDataNode) {
+		let ret = utils.FMT26.StringToColRow(CTypeParser.CustomDataNode);
+		let data = GetCellData(worksheet, ret.col - 1, ret.row - 1);
+		if (data) {
+			DataTable.customData = data?.w;
+			rIdx = ret.row;
+		}
+	}
 	// find column name
 	rIdx = HandleWorkSheetNameColumn(worksheet, rIdx, RowMax, ColumnMax, fileName, sheetName, DataTable, arrHeaderName);
 	if (rIdx < 0)

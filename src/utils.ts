@@ -182,6 +182,7 @@ export class SheetDataTable {
 	public arrTypeHeader = new Array<SheetHeader>();
 	public arrHeaderNameMap = new Map<string, number>();
 	public arrValues = new Array<SheetRow>();
+	public customData?: string;
 
 	private makeColumnKeyMap(columnName: string): boolean {
 		for (let i = 0; i < this.arrTypeHeader.length; ++i) {
@@ -323,6 +324,8 @@ export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 ////////////////////////////////////////////////////////////////////////////////
 //#region Format Converter
 export module FMT26 {
+	const WORDS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
 	export function NumToS26(num: number): string {
 		let result = "";
 		++num;
@@ -344,7 +347,20 @@ export module FMT26 {
 				return 0;
 			result += (c.charCodeAt(0) - 64) * j;
 		}
-		return --result;
+		return result;
+	}
+
+	export function StringToColRow(str: string): { row: number, col: number } {
+		let ret = { row: 0, col: 0 };
+		for (let i = 0; i < str.length; ++i) {
+			if (WORDS.indexOf(str[i]) < 0) {
+				ret.row = parseInt(str.substr(i));
+				ret.col = S26ToNum(str.substr(0, i));
+				break;
+			}
+		}
+
+		return ret;
 	}
 }
 
