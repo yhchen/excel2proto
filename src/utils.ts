@@ -224,6 +224,7 @@ export type ExportCfg = {
 	ExtName?: string;
 	Namespace?: string; // for csharp
 	UseShortName?: boolean;
+	UseNamespace?:Array<string>;
 }
 // export template
 export abstract class IExportWrapper {
