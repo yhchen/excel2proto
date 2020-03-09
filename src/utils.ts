@@ -223,6 +223,7 @@ export type ExportCfg = {
 	ExportTemple?: string;
 	ExtName?: string;
 	Namespace?: string; // for csharp
+	IDUseGeterAndSeter?: boolean;
 	UseShortName?: boolean;
 }
 // export template

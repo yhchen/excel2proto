@@ -127,9 +127,15 @@ class CSDExport extends utils.IExportWrapper {
 		}
 
 		let data = `{${utils.LineBreaker}`;
+		let idx = 0;
 		for (let header of arrExportHeader) {
 			if (header.comment) continue;
-			data += `\tpublic ${this.GenTypeName(header.typeChecker.type, false)} ${this.TranslateColName(header.name)};${utils.LineBreaker}`;
+			if (this._exportCfg.IDUseGeterAndSeter && idx == 0) {
+				data += `\tpublic ${this.GenTypeName(header.typeChecker.type, false)} ${this.TranslateColName(header.name)} {get; set;}${utils.LineBreaker}`;
+			} else {
+				data += `\tpublic ${this.GenTypeName(header.typeChecker.type, false)} ${this.TranslateColName(header.name)};${utils.LineBreaker}`;
+			}
+			++idx;
 		}
 		data += `}${utils.LineBreaker}`;
 		return data;

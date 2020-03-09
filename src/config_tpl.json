@@ -90,6 +90,7 @@
             "UseDefaultValueIfEmpty": false,
             "Namespace": "Hotfix",
             "NameTranslate": { "Id": "_id" },
+            "IDUseGeterAndSeter": true,             "cm01": "only support for c#",
             "UseShortName": true
         },
         {
@@ -99,6 +100,7 @@
             "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
             "Namespace": "Hotfix",
             "UseDefaultValueIfEmpty": false,
+            "IDUseGeterAndSeter": true,             "cm01": "only support for c#",
             "NameTranslate": { "Id": "_id" },
             "UseShortName": true
         }
