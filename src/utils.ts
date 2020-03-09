@@ -326,6 +326,7 @@ export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['js', require('./export/export_to_js')],
 	['tsd', require('./export/export_to_tsd')],
 	['lua', require('./export/export_to_lua')],
+	['jsonline', require('./export/export_to_json_line')],
 ]);
 
 //#endregion

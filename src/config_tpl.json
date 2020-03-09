@@ -101,6 +101,13 @@
             "UseDefaultValueIfEmpty": false,
             "NameTranslate": { "Id": "_id" },
             "UseShortName": true
+        },
+        {
+            "type": "jsonline",
+            "OutputDir": "./test/exports/jsonline/",
+            "GroupFilter": ["ALL"],
+            "NameTranslate": {"Id":"_id"},
+            "UseDefaultValueIfEmpty": false
         }
     ],
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,
