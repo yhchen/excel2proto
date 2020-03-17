@@ -51,11 +51,12 @@ class JSONExport extends utils.IExportWrapper {
 		let item: any = {};
 		for (let i = 0; i < header.length && i < sheetRow.values.length; ++i) {
 			if (!header[i] || header[i].comment) continue;
-			if (sheetRow.values[i] != null) {
-				item[this.TranslateColName(header[i].name)] = sheetRow.values[i];
+			let head = header[i];
+			if (sheetRow.values[head.cIdx] != null) {
+				item[this.TranslateColName(head.name)] = sheetRow.values[head.cIdx];
 			} else if (exportCfg.UseDefaultValueIfEmpty) {
-				if (header[i].typeChecker.DefaultValue != undefined) {
-					item[this.TranslateColName(header[i].name)] = header[i].typeChecker.DefaultValue;
+				if (head.typeChecker.DefaultValue != undefined) {
+					item[this.TranslateColName(head.name)] = head.typeChecker.DefaultValue;
 				}
 			}
 		}
