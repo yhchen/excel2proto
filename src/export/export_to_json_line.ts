@@ -8,7 +8,7 @@ class JSONExport extends utils.IExportWrapper {
 	public get DefaultExtName(): string { return '.txt'; }
 	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
-		let tabIds:number[] = [];
+		let tabIds: number[] = [];
 		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
@@ -19,12 +19,12 @@ class JSONExport extends utils.IExportWrapper {
 			let item = this.ParseJsonLine(arrExportHeader, row, tabIds, this._exportCfg);
 			if (item) {
 				conentText += JSON.stringify(item || "{}") + '\n';
-			} 
+			}
 		}
 		let IdsContent = JSON.stringify(tabIds || "{}") + '\n';
 		conentText += "\"Ids\":" + IdsContent;
 		if (this.IsFile(outdir)) {
-			
+
 		} else {
 			if (!this.CreateDir(outdir)) {
 				utils.exception(`create output path "${utils.yellow_ul(outdir)}" failure!`);
@@ -48,12 +48,14 @@ class JSONExport extends utils.IExportWrapper {
 	private ParseJsonLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, tabIds: number[], exportCfg: utils.ExportCfg) {
 		if (sheetRow.type != utils.ESheetRowType.data)
 			return;
+		if (header.length <= 0)
+			return;
 		let item: any = {};
-		for (let i = 0; i < header.length && i < sheetRow.values.length; ++i) {
+		for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i, cIdx = header[i]?.cIdx) {
 			if (!header[i] || header[i].comment) continue;
 			let head = header[i];
-			if (sheetRow.values[head.cIdx] != null) {
-				item[this.TranslateColName(head.name)] = sheetRow.values[head.cIdx];
+			if (sheetRow.values[cIdx] != null) {
+				item[this.TranslateColName(head.name)] = sheetRow.values[cIdx];
 			} else if (exportCfg.UseDefaultValueIfEmpty) {
 				if (head.typeChecker.DefaultValue != undefined) {
 					item[this.TranslateColName(head.name)] = head.typeChecker.DefaultValue;
@@ -63,7 +65,7 @@ class JSONExport extends utils.IExportWrapper {
 		tabIds.push(sheetRow.values[0]);
 		return item;
 	}
-	
+
 
 	private _globalObj: any = {};
 }

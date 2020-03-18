@@ -109,7 +109,7 @@
         {
             "type": "jsonline",
             "OutputDir": "./test/exports/jsonline/",
-            "GroupFilter": ["ALL"],
+            "GroupFilter": ["WHITE"],
             "NameTranslate": {"Id":"_id"},
             "UseDefaultValueIfEmpty": false
         }

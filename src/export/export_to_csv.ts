@@ -1,11 +1,22 @@
 import * as utils from "../utils";
 import * as fs from "fs-extra-promise";
 import * as path from 'path';
+import { ESheetRowType } from "../utils";
 
 function ParseCSVLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, exportCfg: utils.ExportCfg): string {
 	let tmpArry = new Array<string>();
-	for (let i = 0; i < sheetRow.values.length; ++i) {
-		let value = sheetRow.values[i];
+	for (let i = 0; i < header.length; ++i) {
+		let value = '';		 
+		if (sheetRow.type == ESheetRowType.header) {
+			value = sheetRow.values[i];
+		} else if (sheetRow.type == ESheetRowType.data) {
+			let cIdx = header[i].cIdx;
+			if (cIdx >= sheetRow.values.length) {
+				break;
+			}
+			value = sheetRow.values[cIdx];
+		}
+		
 		let tmpValue = '';
 		if (value == null) {
 			if (exportCfg.UseDefaultValueIfEmpty) {

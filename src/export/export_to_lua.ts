@@ -7,10 +7,10 @@ function ParseJsonObject(header: Array<utils.SheetHeader>, sheetRow: utils.Sheet
 	if (sheetRow.type != utils.ESheetRowType.data)
 		return;
 	let item: any = {};
-	for (let i = 0; i < header.length && i < sheetRow.values.length; ++i) {
+	for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i, cIdx = header[i]?.cIdx) {
 		const hdr = header[i];
 		if (!hdr || hdr.comment) continue;
-		const val = sheetRow.values[i];
+		const val = sheetRow.values[cIdx];
 		if (val != null) {
 			item[hdr.name] = val;
 		} else if (exportCfg.UseDefaultValueIfEmpty) {
@@ -48,7 +48,7 @@ function exportToSingleLuaContent(sheetName: string, header: Array<utils.SheetHe
 		const objLst = new Array<string>();
 		const jsObjSingle = jsObj[id];
 		for (const hdr of header) {
-			if (!jsObjSingle[hdr.name]) continue;
+			if (jsObjSingle[hdr.name] == undefined) continue;
 			objLst.push(`\t\t[${hdr.shortName}] = ${json_to_lua.jsObjectToLua(jsObjSingle[hdr.name])},`);
 		}
 		tableLst.push(`\t${json_to_lua.makeLuaKey(id)} = {\n${objLst.join('\n')}\n\t},`);

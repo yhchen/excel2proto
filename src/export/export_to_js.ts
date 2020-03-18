@@ -7,10 +7,10 @@ function ParseJSLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow,
 	if (sheetRow.type != utils.ESheetRowType.data)
 		return undefined;
 	let item: any = {};
-	for (let i = 0; i < header.length && i < sheetRow.values.length; ++i) {
+	for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i,cIdx = header[i]?.cIdx) {
 		if (!header[i] || header[i].comment) continue;
-		if (sheetRow.values[i] != undefined) {
-			item[header[i].name] = sheetRow.values[i];
+		if (sheetRow.values[cIdx] != undefined) {
+			item[header[i].name] = sheetRow.values[cIdx];
 		} else if (exportCfg.UseDefaultValueIfEmpty) {
 			if (header[i].typeChecker.DefaultValue != undefined) {
 				item[header[i].name] = header[i].typeChecker.DefaultValue;

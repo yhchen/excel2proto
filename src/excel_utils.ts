@@ -228,7 +228,8 @@ function HandleWorkSheetDataColumn(worksheet: xlsx.WorkSheet,
 			let colObj;
 			try {
 				colObj = col.parser.ParseContent(cell);
-				tmpArry.push(colObj);
+				tmpArry[col.cIdx] = colObj;
+				// tmpArry.push(colObj);
 			} catch (ex) {
 				// col.checker.ParseDataStr(cell);
 				utils.exceptionRecord(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" `
