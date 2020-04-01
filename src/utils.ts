@@ -142,7 +142,7 @@ export enum ESheetRowType {
 export type SheetRow = {
 	type: ESheetRowType,
 	values: Array<any>,
-	cIdx: number;
+	rIdx: number;
 }
 export type SheetHeader = {
 	name: string, // name

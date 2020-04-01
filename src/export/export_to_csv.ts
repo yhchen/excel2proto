@@ -6,7 +6,7 @@ import { ESheetRowType } from "../utils";
 function ParseCSVLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, exportCfg: utils.ExportCfg): string {
 	let tmpArry = new Array<string>();
 	for (let i = 0; i < header.length; ++i) {
-		let value = '';		 
+		let value: any = ''; 
 		if (sheetRow.type == ESheetRowType.header) {
 			value = sheetRow.values[i];
 		} else if (sheetRow.type == ESheetRowType.data) {

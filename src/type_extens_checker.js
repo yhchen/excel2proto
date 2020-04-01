@@ -20,13 +20,13 @@ const enums = {
 ////////////////////////////////////////////////////////////////////////////////
 // ?????????? check function add below ??????????
 const checker = {
-	CheckItem: function (data) {
+	CheckItem: function (data, rowData, headerNameMap) {
 		if (!data) return true;
 		return Item.checkColumnContainsValue('id', data[0]);
 	},
 
 	// check item config valid
-	CheckAward: function (data) {
+	CheckAward: function (data, rowData, headerNameMap) {
 		if (!data) return true;
 		switch (data[0]) {
 			case enums.EItemType.Item:
@@ -38,13 +38,13 @@ const checker = {
 	},
 };
 
-// @return: row['name']
-function getDataByColName(row, headerNameMap, name) {
-	const idx = headerNameMap.get(name);
-	if (idx === undefined) {
-		throw `type extens checker failure. column name ${name} not found!`;
-	}
-	return row[idx - 1];
+// @return: rowData['name']
+function getDataByColName(rowData, headerNameMap, name) {
+    let idx = headerNameMap.get(name);
+    if (idx === undefined) {
+        throw `type extens checker failure. column name ${name} not found!`;
+    }
+    return rowData[idx - 1];
 }
 
 exports.enums = enums;

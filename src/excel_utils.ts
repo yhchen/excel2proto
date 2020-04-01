@@ -132,7 +132,7 @@ function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 		}
 		DataTable.arrTypeHeader = typeHeader;
 		DataTable.arrHeaderNameMap = headerNameMap;
-		DataTable.arrValues.push({ type: utils.ESheetRowType.type, values: tmpArry, cIdx: rIdx });
+		DataTable.arrValues.push({ type: utils.ESheetRowType.type, values: tmpArry, rIdx });
 		++rIdx;
 		break;
 	}
@@ -199,7 +199,7 @@ function HandleWorkSheetNameColumn(worksheet: xlsx.WorkSheet,
 			arrHeaderName.push({ cIdx, name: cell.w, parser: new CTypeParser(ETypeNames.string), color: colGrp });
 			tmpArry.push(cell.w);
 		}
-		DataTable.arrValues.push({ type: utils.ESheetRowType.header, values: tmpArry, cIdx: rIdx });
+		DataTable.arrValues.push({ type: utils.ESheetRowType.header, values: tmpArry, rIdx });
 		++rIdx;
 		break;
 	}
@@ -229,7 +229,6 @@ function HandleWorkSheetDataColumn(worksheet: xlsx.WorkSheet,
 			try {
 				colObj = col.parser.ParseContent(cell);
 				tmpArry[col.cIdx] = colObj;
-				// tmpArry.push(colObj);
 			} catch (ex) {
 				// col.checker.ParseDataStr(cell);
 				utils.exceptionRecord(`Excel "${utils.yellow_ul(fileName)}" Sheet "${utils.yellow_ul(sheetName)}" `
@@ -249,7 +248,7 @@ function HandleWorkSheetDataColumn(worksheet: xlsx.WorkSheet,
 			}
 		}
 		if (!firstCol) {
-			DataTable.arrValues.push({ type: utils.ESheetRowType.data, values: tmpArry, cIdx: rIdx });
+			DataTable.arrValues.push({ type: utils.ESheetRowType.data, values: tmpArry, rIdx });
 		}
 	}
 	return rIdx;
