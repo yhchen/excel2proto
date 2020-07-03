@@ -2,18 +2,20 @@ import * as path from 'path';
 import * as fs from "fs-extra-promise";
 import * as utils from "../utils";
 
-function ParseJSLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow,
+function ParseJSLine(exportWrapper: utils.IExportWrapper, header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow,
 	rootNode: any, exportCfg: utils.ExportCfg): string | undefined {
 	if (sheetRow.type != utils.ESheetRowType.data)
 		return undefined;
 	let item: any = {};
-	for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i,cIdx = header[i]?.cIdx) {
-		if (!header[i] || header[i].comment) continue;
+	for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i, cIdx = header[i]?.cIdx) {
+		const head = header[i];
+		if (!head || head.comment) continue;
+		const name = exportWrapper.TranslateColName(head.name);
 		if (sheetRow.values[cIdx] != undefined) {
-			item[header[i].name] = sheetRow.values[cIdx];
+			item[name] = sheetRow.values[cIdx];
 		} else if (exportCfg.UseDefaultValueIfEmpty) {
-			if (header[i].typeChecker.DefaultValue != undefined) {
-				item[header[i].name] = header[i].typeChecker.DefaultValue;
+			if (head.typeChecker.DefaultValue != undefined) {
+				item[name] = head.typeChecker.DefaultValue;
 			}
 		}
 	}
@@ -66,7 +68,7 @@ class JSExport extends utils.IExportWrapper {
 			return true;
 		}
 		for (let row of dt.arrValues) {
-			ParseJSLine(arrExportHeader, row, jsObj, this._exportCfg);
+			ParseJSLine(this, arrExportHeader, row, jsObj, this._exportCfg);
 		}
 		if (this.IsFile(outdir)) {
 			this._globalObj[dt.name] = jsObj;

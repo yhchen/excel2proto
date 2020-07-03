@@ -54,12 +54,14 @@ class JSONExport extends utils.IExportWrapper {
 		if (header.length <= 0) return;
 		let item: any = {};
 		for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i, cIdx = header[i]?.cIdx) {
-			if (!header[i] || header[i].comment) continue;
+			const head = header[i];
+			if (!head || head.comment) continue;
+			const name = this.TranslateColName(head.name);
 			if (sheetRow.values[cIdx] != null) {
-				item[this.TranslateColName(header[i].name)] = sheetRow.values[cIdx];
+				item[name] = sheetRow.values[cIdx];
 			} else if (exportCfg.UseDefaultValueIfEmpty) {
-				if (header[i].typeChecker.DefaultValue != undefined) {
-					item[this.TranslateColName(header[i].name)] = header[i].typeChecker.DefaultValue;
+				if (head.typeChecker.DefaultValue != undefined) {
+					item[name] = head.typeChecker.DefaultValue;
 				}
 			}
 		}
@@ -69,7 +71,7 @@ class JSONExport extends utils.IExportWrapper {
 		}
 		rootNode._ids.push(sheetRow.values[0]);
 	}
-	
+
 
 	private _globalObj: any = {};
 }

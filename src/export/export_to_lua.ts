@@ -3,23 +3,24 @@ import * as fs from "fs-extra-promise";
 import * as path from 'path';
 import * as json_to_lua from 'json_to_lua';
 
-function ParseJsonObject(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, exportCfg: utils.ExportCfg) {
+function ParseJsonObject(exportWrapper: utils.IExportWrapper, header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, rootNode: any, exportCfg: utils.ExportCfg) {
 	if (sheetRow.type != utils.ESheetRowType.data)
 		return;
 	let item: any = {};
 	for (let i = 0, cIdx = header[0].cIdx; i < header.length && cIdx < sheetRow.values.length; ++i, cIdx = header[i]?.cIdx) {
 		const hdr = header[i];
 		if (!hdr || hdr.comment) continue;
+		const name = exportWrapper.TranslateColName(hdr.name);
 		const val = sheetRow.values[cIdx];
 		if (val != null) {
-			item[hdr.name] = val;
+			item[name] = val;
 		} else if (exportCfg.UseDefaultValueIfEmpty) {
 			if (hdr.typeChecker.DefaultValue != undefined) {
-				item[hdr.name] = hdr.typeChecker.DefaultValue;
+				item[name] = hdr.typeChecker.DefaultValue;
 			}
 		}
 		if (i == 0) {
-			rootNode["ids"].push(item[header[0].name])
+			rootNode["ids"].push(item[name]);
 		}
 	}
 	rootNode[sheetRow.values[0]] = item;
@@ -31,7 +32,7 @@ type IExportToSingleLuaData = {
 }
 
 // export to single lua file
-function exportToSingleLuaContent(sheetName: string, header: Array<utils.SheetHeader>, jsObj: any, shortName: boolean = false): IExportToSingleLuaData {
+function exportToSingleLuaContent(exportWrapper: utils.IExportWrapper, sheetName: string, header: Array<utils.SheetHeader>, jsObj: any, shortName: boolean = false): IExportToSingleLuaData {
 	if (!shortName) {
 		return { head: '', data: json_to_lua.jsObjectToLuaPretty(jsObj, 2) };
 	}
@@ -39,8 +40,9 @@ function exportToSingleLuaContent(sheetName: string, header: Array<utils.SheetHe
 	const NameMapToShort = new Map<string, string>();
 	for (let i = 0; i < header.length; ++i) {
 		const head = header[i];
-		headLst.push(`local ${head.shortName} = "${head.name}"`);
-		NameMapToShort.set(head.name, head.shortName);
+		const name = exportWrapper.TranslateColName(head.name);
+		headLst.push(`local ${head.shortName} = "${name}"`);
+		NameMapToShort.set(name, head.shortName);
 	}
 	const headContent = headLst.join('\n');
 	const tableLst = new Array<string>();
@@ -48,8 +50,9 @@ function exportToSingleLuaContent(sheetName: string, header: Array<utils.SheetHe
 		const objLst = new Array<string>();
 		const jsObjSingle = jsObj[id];
 		for (const hdr of header) {
-			if (jsObjSingle[hdr.name] == undefined) continue;
-			objLst.push(`\t\t[${hdr.shortName}] = ${json_to_lua.jsObjectToLua(jsObjSingle[hdr.name])},`);
+			const name = exportWrapper.TranslateColName(hdr.name);
+			if (jsObjSingle[name] == undefined) continue;
+			objLst.push(`\t\t[${hdr.shortName}] = ${json_to_lua.jsObjectToLua(jsObjSingle[name])},`);
 		}
 		tableLst.push(`\t${json_to_lua.makeLuaKey(id)} = {\n${objLst.join('\n')}\n\t},`);
 	}
@@ -69,7 +72,7 @@ class LuaExport extends utils.IExportWrapper {
 			return true;
 		}
 		for (let row of dt.arrValues) {
-			ParseJsonObject(arrExportHeader, row, jsonObj, this._exportCfg);
+			ParseJsonObject(this, arrExportHeader, row, jsonObj, this._exportCfg);
 		}
 		if (this.IsFile(outdir)) {
 			this._globalObj[dt.name] = jsonObj;
@@ -93,7 +96,7 @@ class LuaExport extends utils.IExportWrapper {
 				return false;
 			}
 			try {
-				const dataCtx = exportToSingleLuaContent(dt.name, arrExportHeader, jsonObj, this._exportCfg.UseShortName);
+				const dataCtx = exportToSingleLuaContent(this, dt.name, arrExportHeader, jsonObj, this._exportCfg.UseShortName);
 				const NameRex = new RegExp('{name}', 'g');
 				let luacontent = FMT.replace(NameRex, dt.name).replace('{data}', dataCtx.data);
 				if (utils.StrNotEmpty(dataCtx.head)) {
