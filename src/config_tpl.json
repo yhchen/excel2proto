@@ -116,10 +116,11 @@
     ],
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,
     "DateFmt": "YYYY/MM/DD HH:mm:ss",
+    "TypeCheckerJSFilePath": "",   "cm21": "relative to ${cwd} or absolute path",
     "TinyDateFmt": "YYYY/MM/DD",
     "TimeStampUseMS": true,
-    "CustomDataNode": "B1",
-    "LineBreak": "\r\n",
+    "CustomDataNode": "B1", "cm22": "custom defined data, can be null",
+    "LineBreak": "\n",
     "FractionDigitsFMT": 6,
     "EnableTypeCheck": true,
     "EnableDebugOutput": true

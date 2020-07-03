@@ -1,8 +1,10 @@
 import * as fs from 'fs-extra-promise';
-import * as utils from './utils'
+import * as path from 'path';
+import * as utils from './utils';
 import { CTypeParser } from './CTypeParser';
 
 import ConfTpl from "./config_tpl.json";
+import { CHightTypeChecker } from './CHighTypeChecker';
 
 // Work Root Dir
 export const gRootDir = process.cwd();
@@ -40,6 +42,22 @@ export function InitGlobalConfig(fpath: string = ''): boolean {
 	CTypeParser.TimeStampUseMS = gCfg.TimeStampUseMS;
 	CTypeParser.CustomDataNode = gCfg.CustomDataNode;
 	CTypeParser.FractionDigitsFMT = gCfg.FractionDigitsFMT;
+	if (gCfg.TypeCheckerJSFilePath) {
+		let gPath = gCfg.TypeCheckerJSFilePath;
+		if (!path.isAbsolute(gPath)) {
+			gPath = path.join(gRootDir, gPath);
+		}
+		if (!fs.existsSync(gPath)) {
+			utils.exception("config : {TypeCheckerJSFilePath} incorrect! path not found!");
+		}
+		CHightTypeChecker.TypeCheckerJSFilePath = gPath;
+		try {
+			require(gPath);
+		}
+		catch (ex) {
+			utils.exception("config: {TypeCheckerJSFilePath} incorrect! js file format error", ex);
+		}
+	}
 
 	return true;
 }

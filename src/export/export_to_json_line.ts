@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as fs from "fs-extra-promise";
 import * as utils from "../utils";
+import { CTypeParser } from '../CTypeParser';
 
 class JSONExport extends utils.IExportWrapper {
 	constructor(exportCfg: utils.ExportCfg) { super(exportCfg); }
@@ -18,10 +19,10 @@ class JSONExport extends utils.IExportWrapper {
 		for (let row of dt.arrValues) {
 			let item = this.ParseJsonLine(arrExportHeader, row, tabIds, this._exportCfg);
 			if (item) {
-				conentText += JSON.stringify(item || "{}") + '\n';
+				conentText += JSON.stringify(item || "{}") + utils.LineBreaker;
 			}
 		}
-		let IdsContent = JSON.stringify(tabIds || "{}") + '\n';
+		let IdsContent = JSON.stringify(tabIds || "{}") + utils.LineBreaker;
 		conentText += "\"Ids\":" + IdsContent;
 		if (this.IsFile(outdir)) {
 

@@ -6,10 +6,10 @@ let type_checker: any = undefined;
 
 function InitEnv() {
 	try {
-		type_enums = require('./type_extens_checker').enums;
-		type_checker = require('./type_extens_checker').checker;
+		type_enums = require(CHightTypeChecker.TypeCheckerJSFilePath).enums;
+		type_checker = require(CHightTypeChecker.TypeCheckerJSFilePath).checker;
 	} catch (ex) {
-		utils.exception(`type_extens_checker format error ${ex}`);
+		utils.exception(`type_extens_checker: ${CHightTypeChecker.TypeCheckerJSFilePath} format error ${ex}`);
 		process.exit(utils.E_ERROR_LEVEL.INIT_EXTENDS);
 	}
 	// convert enum (key -> value) to (value -> key)
@@ -88,6 +88,8 @@ class CTypeGenerator {
 
 export class CHightTypeChecker {
 	public constructor(s: string) { this._type = s; }
+
+	public static TypeCheckerJSFilePath = './type_extens_checker';
 
 	public init() {
 		if (!type_checker) {

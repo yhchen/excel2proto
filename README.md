@@ -17,10 +17,12 @@
 type|desc
 ---|---
 csv|csv format
-json|Export as `json` format. If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
-js|Export as `js` format. Set `Export.ExportTemple` for export template. The tools will replace `{name}` with sheet name, and replace `{data}` with sheet data. If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
-tsd|Export *.d.ts file for language `typescript` type check. Set `Export.ExportTemple` for export template. The tools will replace `{type}` with table type, and replace `{data}` with row type. If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
-lua|Support in future releases
+json|Export as `json` format. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
+js|Export as `js` format. <br>Set `Export.ExportTemple` for export template. The tools will replace `{name}` with sheet name, and replace `{data}` with sheet data. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
+tsd|Export *.d.ts file for language `typescript` type check. <br>Set `Export.ExportTemple` for export template. The tools will replace `{type}` with table type, and replace `{data}` with row type. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
+lua|Export as `lua table` format. <br>Support Key name Compress if `Export.UseShortName` is true. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
+csharp(c#)|Export as `csharp(c#)` code. <br>Support {customData} replace is `ExportTemple` if `Export.CustomDataNode` set to be a sheet cell. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
+jsonline|Export each line as as `json` format each line end with `Export.`, Compatible with ET Framework. see: [https://github.com/egametang/ET](#https://github.com/egametang/ET)
 
 ## Support Format Check
 
