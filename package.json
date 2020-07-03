@@ -1,6 +1,6 @@
 {
   "name": "excel_tiny_wrapper",
-  "version": "2.7.9",
+  "version": "2.7.11",
   "description": "excel export with type check using nodejs in super fast speed!",
   "main": "bin/index.js",
   "scripts": {
