@@ -103,6 +103,7 @@ function HandleHighLevelTypeCheck(): boolean {
 		const database = kv[1];
 		for (let colIdx = 0; colIdx < database.arrTypeHeader.length; ++colIdx) {
 			let header = database.arrTypeHeader[colIdx];
+			const cIdx = header.cIdx;
 			if (!header.highCheck) continue;
 			try {
 				header.highCheck.init();
@@ -113,18 +114,19 @@ function HandleHighLevelTypeCheck(): boolean {
 			for (let rowIdx = 0; rowIdx < database.arrValues.length; ++rowIdx) {
 				const row = database.arrValues[rowIdx];
 				if (row.type != utils.ESheetRowType.data) continue;
-				const data = row.values[colIdx];
+				const data = row.values[cIdx];
 
 				// if (!data) continue;
 				try {
 					if (!header.highCheck.checkType(data, row.values, database.arrHeaderNameMap)) {
+						header.highCheck.checkType(data, row.values, database.arrHeaderNameMap);
 						throw '';
 					}
 				} catch (ex) {
 					foundError = true;
 					// header.highCheck.checkType(data); // for debug
 					utils.exceptionRecord(`Excel "${utils.yellow_ul(database.filename)}" `
-						+ `Sheet Row "${utils.yellow_ul(database.name + '.' + utils.yellow_ul(header.name))}" High Type format error`
+						+ `Sheet Row "${utils.yellow_ul(database.name + '.' + utils.yellow_ul(header.name))}" High Type format error `
 						+ `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(header.cIdx) + (row.rIdx + 1).toString())}" `
 						+ ` "${utils.yellow_ul(data)}"!`, ex);
 				}
