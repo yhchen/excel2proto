@@ -217,6 +217,7 @@ export function SetLineBreaker(v: string) {
 export type ExportCfg = {
 	type: string;
 	OutputDir: string;
+	OutputDataDir?: string;
 	UseDefaultValueIfEmpty: boolean;
 	NameTranslate?: { [key: string]: string }; // translate name to target name
 	GroupFilter: Array<string>;
@@ -225,7 +226,8 @@ export type ExportCfg = {
 	Namespace?: string; // for csharp
 	IDUseGeterAndSeter?: boolean;
 	UseShortName?: boolean;
-	UseNamespace?:Array<string>;
+	UseNamespace?: Array<string>;
+
 }
 // export template
 export abstract class IExportWrapper {
@@ -241,6 +243,7 @@ export abstract class IExportWrapper {
 		const newName = this._exportCfg.NameTranslate[name];
 		return newName ?? name;
 	}
+
 	public async ExportToAsync(dt: SheetDataTable, endCallBack: (ok: boolean) => void): Promise<boolean> {
 		let ok = false;
 		try {
@@ -253,6 +256,7 @@ export abstract class IExportWrapper {
 		}
 		return ok;
 	}
+
 	public async ExportToGlobalAsync(endCallBack: (ok: boolean) => void): Promise<boolean> {
 		let ok = false;
 		try {
@@ -329,6 +333,7 @@ export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
 	['tsd', require('./export/export_to_tsd')],
 	['lua', require('./export/export_to_lua')],
 	['jsonline', require('./export/export_to_json_line')],
+	['proto3', require('./export/export_to_proto3')],
 ]);
 
 //#endregion
@@ -353,7 +358,7 @@ export module FMT26 {
 	export function S26ToNum(str: string): number {
 		let result = 0;
 		let ss = str.toUpperCase();
-		for (let i = str.length - 1, j = 1; i >= 0; i-- , j *= 26) {
+		for (let i = str.length - 1, j = 1; i >= 0; i--, j *= 26) {
 			let c = ss[i];
 			if (c < 'A' || c > 'Z')
 				return 0;

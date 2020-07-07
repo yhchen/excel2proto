@@ -12,65 +12,90 @@
     },
     "Export": [
         {
-            "<type> can be [csv|json|js|tsd|lua].": null,
             "type": "json",
             "OutputDir": "./test/exports/global.json",
-            "GroupFilter": ["ALL"],
+            "GroupFilter": [
+                "ALL"
+            ],
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "json",
             "OutputDir": "./test/exports/json/",
-            "GroupFilter": ["YELLOW"],
-            "NameTranslate": { "Id": "_id" },
+            "GroupFilter": [
+                "YELLOW"
+            ],
+            "NameTranslate": {
+                "Id": "_id"
+            },
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "json",
             "OutputDir": "./test/exports/json-bytes.bytes",
-            "GroupFilter": ["ALL"],
+            "GroupFilter": [
+                "ALL"
+            ],
             "ExtName": ".bytes",
-            "NameTranslate": { "Id": "_id" },
+            "NameTranslate": {
+                "Id": "_id"
+            },
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "js",
             "OutputDir": "./test/exports/js/",
-            "GroupFilter": ["GREEN", "RED", "ALL"],
+            "GroupFilter": [
+                "GREEN",
+                "RED",
+                "ALL"
+            ],
             "ExportTemple": "export const {name}={data}",
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "js",
             "OutputDir": "./test/exports/global.js",
-            "GroupFilter": ["WHITE"],
+            "GroupFilter": [
+                "WHITE"
+            ],
             "ExportTemple": "export const GConfig = {data}",
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "tsd",
             "OutputDir": "./test/exports/global.d.ts",
-            "GroupFilter": ["GREEN", "YELLOW", "RED"],
+            "GroupFilter": [
+                "GREEN",
+                "YELLOW",
+                "RED"
+            ],
             "ExportTemple": "declare namespace GConfig {\n\n{data}export type Cfg = {type}\n\n}",
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "tsd",
             "OutputDir": "./test/exports/tsd/",
-            "GroupFilter": ["ALL"],
+            "GroupFilter": [
+                "ALL"
+            ],
             "ExportTemple": "declare {data}declare {type}",
             "UseDefaultValueIfEmpty": true
         },
         {
             "type": "csv",
             "OutputDir": "./test/exports/csv/",
-            "GroupFilter": ["ALL"],
+            "GroupFilter": [
+                "ALL"
+            ],
             "UseDefaultValueIfEmpty": false
         },
         {
             "type": "lua",
             "OutputDir": "./test/exports/lua/",
-            "GroupFilter": ["ALL"],
+            "GroupFilter": [
+                "ALL"
+            ],
             "ExportTemple": "local {name} = {data}\n\nreturn {name}",
             "UseDefaultValueIfEmpty": false,
             "UseShortName": true
@@ -78,48 +103,88 @@
         {
             "type": "lua",
             "OutputDir": "./test/exports/global.lua",
-            "GroupFilter": ["RED"],
+            "GroupFilter": [
+                "RED"
+            ],
             "ExportTemple": "GConfig = {data}",
             "UseDefaultValueIfEmpty": true
         },
         {
             "type": "csharp",
             "OutputDir": "./test/exports/csharp/",
-            "GroupFilter": ["ALL"],
-            "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
+            "GroupFilter": [
+                "ALL"
+            ],
+            "ExportTemple": "[Config((int)({customData}))]\npublic partial class {name}Category : ACategory<{name}>{}\npublic class {name}: IConfig\n{data}\n",
             "UseDefaultValueIfEmpty": false,
             "Namespace": "Hotfix",
-            "UseNamespace": ["ETModel", "ddd"],
-            "NameTranslate": { "Id": "_id" },
-            "IDUseGeterAndSeter": true, "cm01": "only support for c#",
+            "UseNamespace": [
+                "ETModel",
+                "ddd"
+            ],
+            "NameTranslate": {
+                "Id": "_id"
+            },
+            "IDUseGeterAndSeter": true,
+            "cm01": "only support for c#",
             "UseShortName": true
         },
         {
             "type": "csharp",
-            "OutputDir": "./test/exports/csharp.cs",
-            "GroupFilter": ["ALL"],
-            "ExportTemple": "[Config((int)({customData}))]\r\npublic partial class {name}Category : ACategory<{name}>{}\r\npublic class {name}: IConfig\r\n{data}\r\n",
+            "OutputDir": "./test/exports/global.cs",
+            "GroupFilter": [
+                "ALL"
+            ],
+            "ExportTemple": "[Config((int)({customData}))]\npublic partial class {name}Category : ACategory<{name}>{}\npublic class {name}: IConfig\n{data}\n",
             "Namespace": "Hotfix",
-            "UseNamespace": ["ETModel", "ddd"],
+            "UseNamespace": [
+                "ETModel",
+                "ddd"
+            ],
             "UseDefaultValueIfEmpty": false,
-            "IDUseGeterAndSeter": true, "cm01": "only support for c#",
-            "NameTranslate": { "Id": "_id" },
+            "IDUseGeterAndSeter": true,
+            "cm01": "only support for c#",
+            "NameTranslate": {
+                "Id": "_id"
+            },
+            "UseShortName": true
+        },
+        {
+            "type": "proto3",
+            "OutputDir": "./test/exports/global_proto3.proto",
+            "OutputDataDir": "./test/exports/proto3-data/",
+            "ExtName": ".bytes",
+            "GroupFilter": [
+                "ALL"
+            ],
+            "ExportTemple": "{data}",
+            "Namespace": "Hotfix",
+            "UseDefaultValueIfEmpty": false,
+            "NameTranslate": {
+                "Id": "_id"
+            },
             "UseShortName": true
         },
         {
             "type": "jsonline",
             "OutputDir": "./test/exports/jsonline/",
-            "GroupFilter": ["WHITE"],
-            "NameTranslate": { "Id": "_id" },
+            "GroupFilter": [
+                "WHITE"
+            ],
+            "NameTranslate": {
+                "Id": "_id"
+            },
             "UseDefaultValueIfEmpty": false
         }
     ],
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,
     "DateFmt": "YYYY/MM/DD HH:mm:ss",
-    "TypeCheckerJSFilePath": "", "cm21": "relative to ${cwd} or absolute path",
+    "TypeCheckerJSFilePath": "",
+    "cm21": "relative to ${cwd} or absolute path",
     "TinyDateFmt": "YYYY/MM/DD",
     "TimeStampUseMS": true,
-    "CustomDataNode": "B1", "cm22": "custom defined data, can be null",
+    "CustomDataNode": "B1",
+    "cm22": "custom defined data, can be null",
     "LineBreak": "\n",
     "FractionDigitsFMT": 6,
     "EnableTypeCheck": true,
