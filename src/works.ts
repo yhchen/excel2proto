@@ -122,12 +122,11 @@ function HandleHighLevelTypeCheck(): boolean {
 				CHightTypeChecker.setRowData(row.values);
 				try {
 					if (!header.highCheck.checkType(data)) {
-						header.highCheck.checkType(data);
+						// header.highCheck.checkType(data); // for debug
 						throw '';
 					}
 				} catch (ex) {
 					foundError = true;
-					// header.highCheck.checkType(data); // for debug
 					utils.exceptionRecord(`Excel "${utils.yellow_ul(database.filename)}" `
 						+ `Sheet Row "${utils.yellow_ul(database.name + '.' + utils.yellow_ul(header.name))}" High Type format error `
 						+ `Cell "${utils.yellow_ul(utils.FMT26.NumToS26(header.cIdx) + (row.rIdx + 1).toString())}" `
