@@ -3,6 +3,7 @@ import * as fs from 'fs-extra-promise';
 import * as utils from './utils';
 import { gCfg, gRootDir, gGlobalIgnoreDirName } from './config'
 import { HandleExcelFile } from './excel_utils'
+import { CHightTypeChecker } from './CHighTypeChecker';
 
 const gExportWrapperLst = new Array<utils.IExportWrapper>();
 function InitEnv(): boolean {
@@ -43,13 +44,13 @@ export async function execute(): Promise<boolean> {
 ////////////////////////////////////////////////////////////////////////////////
 //#region private side
 const WorkerMonitor = new utils.AsyncWorkMonitor();
-async function HandleExcelFileWork(fileName: string, cb: (ret:boolean)=>void): Promise<void> {
+async function HandleExcelFileWork(fileName: string, cb: (ret: boolean) => void): Promise<void> {
 	WorkerMonitor.addWork();
 	cb(await HandleExcelFile(fileName));
 	WorkerMonitor.decWork();
 }
 
-async function HandleDir(dirName: string, cb: (ret:boolean)=>void): Promise<void> {
+async function HandleDir(dirName: string, cb: (ret: boolean) => void): Promise<void> {
 	if (gGlobalIgnoreDirName.has(path.basename(dirName))) {
 		utils.logger(`ignore folder ${dirName}`);
 		return;
@@ -111,6 +112,7 @@ function HandleHighLevelTypeCheck(): boolean {
 				utils.exception(`Excel "${utils.yellow_ul(database.filename)}" Sheet "${utils.yellow_ul(database.name)}" High Type`
 					+ ` "${utils.yellow_ul(header.name)}" format error "${utils.yellow_ul(header.highCheck.s)}"!`);
 			}
+			CHightTypeChecker.setHeaderNameMap(database.arrHeaderNameMap);
 			for (let rowIdx = 0; rowIdx < database.arrValues.length; ++rowIdx) {
 				const row = database.arrValues[rowIdx];
 				if (row.type != utils.ESheetRowType.data) continue;
@@ -118,8 +120,8 @@ function HandleHighLevelTypeCheck(): boolean {
 
 				// if (!data) continue;
 				try {
-					if (!header.highCheck.checkType(data, row.values, database.arrHeaderNameMap)) {
-						header.highCheck.checkType(data, row.values, database.arrHeaderNameMap);
+					if (!header.highCheck.checkType(data, row.values)) {
+						header.highCheck.checkType(data, row.values);
 						throw '';
 					}
 				} catch (ex) {

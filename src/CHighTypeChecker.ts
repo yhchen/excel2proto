@@ -3,11 +3,13 @@ import * as utils from './utils';
 
 let type_enums: any = undefined;
 let type_checker: any = undefined;
+let setHeaderNameMap: (headerNameMap: Map<string, number>) => void;
 
 function InitEnv() {
 	try {
 		type_enums = require(CHightTypeChecker.TypeCheckerJSFilePath).enums;
 		type_checker = require(CHightTypeChecker.TypeCheckerJSFilePath).checker;
+		setHeaderNameMap = require(CHightTypeChecker.TypeCheckerJSFilePath).setHeaderNameMap;
 	} catch (ex) {
 		utils.exception(`type_extens_checker: ${CHightTypeChecker.TypeCheckerJSFilePath} format error ${ex}`);
 		process.exit(utils.E_ERROR_LEVEL.INIT_EXTENDS);
@@ -25,8 +27,8 @@ function InitEnv() {
 	}
 }
 
-type CheckFuncType = (value: any, rowDatas: Array<any>, headerNameMap: Map<string, number>) => boolean;
-function defaultFunc(value: any, rowDatas: Array<any>, headerNameMap: Map<string, number>): boolean {
+type CheckFuncType = (value: any, rowDatas: Array<any>) => boolean;
+function defaultFunc(value: any, rowDatas: Array<any>): boolean {
 	return true;
 }
 const KeySet = new Set([',', '[', ']']);
@@ -51,10 +53,10 @@ class CTypeGenerator {
 			this.setLstMode(false);
 		}
 		const func = this._func;
-		this._func = (value: any, row, headerNameMap): boolean => {
+		this._func = (value: any, row): boolean => {
 			if (!value) return true;
 			for (const v of value) {
-				if (!func(v, row, headerNameMap)) {
+				if (!func(v, row)) {
 					return false;
 				}
 			}
@@ -68,9 +70,9 @@ class CTypeGenerator {
 		if (!this._lstMode) {
 			const lst = this._lst;
 			this._lst = []
-			this._func = (value: any, row, headerNameMap): boolean => {
+			this._func = (value: any, row): boolean => {
 				for (let i = 0; i < lst.length; ++i) {
-					if (!lst[i](value[i], row, headerNameMap))
+					if (!lst[i](value[i], row))
 						return false;
 				}
 				return true;
@@ -100,10 +102,14 @@ export class CHightTypeChecker {
 		this._checkFunc = generator.generate();
 	}
 
+	public static setHeaderNameMap(headerNameMap: Map<string, number>): void {
+		setHeaderNameMap(headerNameMap);
+	}
+
 	public get s() { return this._type; }
 
-	public checkType(obj: any, rowDatas: Array<any>, headerNameMap: Map<string, number>): boolean {
-		return this._checkFunc(obj, rowDatas, headerNameMap);
+	public checkType(obj: any, rowDatas: Array<any>): boolean {
+		return this._checkFunc(obj, rowDatas);
 	}
 
 	private initInner(generator: CTypeGenerator, s: string, idx: number) {

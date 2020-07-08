@@ -20,13 +20,13 @@ const enums = {
 ////////////////////////////////////////////////////////////////////////////////
 // ?????????? check function add below ??????????
 const checker = {
-	CheckItem: function (data, rowData, headerNameMap) {
+	CheckItem: function (data, rowData) {
 		if (!data) return true;
 		return Item.checkColumnContainsValue('id', data[0]);
 	},
 
 	// check item config valid
-	CheckAward: function (data, rowData, headerNameMap) {
+	CheckAward: function (data, rowData) {
 		if (!data) return true;
 		switch (data[0]) {
 			case enums.EItemType.Item:
@@ -36,8 +36,8 @@ const checker = {
 		}
 		return false;
 	},
-	CheckGetCellData: function (data, rowData, headerNameMap) {
-		const value = getDataByColName(rowData, headerNameMap, "checkCellValue");
+	CheckGetCellData: function (data, rowData) {
+		const value = getDataByColName(rowData, "checkCellValue");
 		if (data != value) {
 			throw `cell data: ${data} != ${value}`;
 			return false;
@@ -47,13 +47,20 @@ const checker = {
 };
 
 // @return: rowData['name']
-function getDataByColName(rowData, headerNameMap, name) {
-	let idx = headerNameMap.get(name);
+function getDataByColName(rowData, name) {
+	let idx = _headerNameMap.get(name);
 	if (idx === undefined) {
 		throw `type extens checker failure. column name ${name} not found!`;
 	}
 	return rowData[idx];
 }
 
+let _headerNameMap
+
+function setHeaderNameMap(headerNameMap) {
+	_headerNameMap = headerNameMap
+}
+
 exports.enums = enums;
 exports.checker = checker;
+exports.setHeaderNameMap = setHeaderNameMap;
