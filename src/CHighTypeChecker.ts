@@ -13,6 +13,11 @@ function InitEnv() {
 		type_checker = checker.checker;
 		setHeaderNameMap = checker.setHeaderNameMap;
 		setRowData = checker.setRowData;
+		const checkColContainsValueMap = new Map<string, (name: string, value: any) => boolean>();
+		for (const [k, v] of utils.ExportExcelDataMap) {
+			checkColContainsValueMap.set(k, v.checkColumnContainsValue.bind(v));
+		}
+		checker.initialize(checkColContainsValueMap);
 	} catch (ex) {
 		utils.exception(`type_extens_checker: ${CHightTypeChecker.TypeCheckerJSFilePath} format error ${ex}`);
 		process.exit(utils.E_ERROR_LEVEL.INIT_EXTENDS);

@@ -1,7 +1,11 @@
-const ExportExcelDataMap = require('./utils').ExportExcelDataMap
+const Sheet = {};
 
-const Item = ExportExcelDataMap.get('Item');
-const Equip = ExportExcelDataMap.get('Equip');
+function initialize(_ExportExcelDataMap) {
+	////////////////////////////////////////////////////////////////////////////////
+	// ?????????? initialize sheet table here ??????????
+	Sheet.Item = _ExportExcelDataMap.get('Item');
+	Sheet.Equip = _ExportExcelDataMap.get('Equip');
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // ?????????? enum type add below ??????????
@@ -22,7 +26,7 @@ const enums = {
 const checker = {
 	CheckItem: function (data) {
 		if (!data) return true;
-		return Item.checkColumnContainsValue('id', data[0]);
+		return Sheet.Item('id', data[0]);
 	},
 
 	// check item config valid
@@ -30,9 +34,9 @@ const checker = {
 		if (!data) return true;
 		switch (data[0]) {
 			case enums.EItemType.Item:
-				return Item.checkColumnContainsValue('id', data[1]);
+				return Sheet.Item('id', data[1]);
 			case enums.EItemType.Equip:
-				return Equip.checkColumnContainsValue('id', data[1]);
+				return Sheet.Equip('id', data[1]);
 		}
 		return false;
 	},
@@ -68,5 +72,6 @@ function setRowData(rowData) {
 
 exports.enums = enums;
 exports.checker = checker;
+exports.initialize = initialize;
 exports.setHeaderNameMap = setHeaderNameMap;
 exports.setRowData = setRowData;
