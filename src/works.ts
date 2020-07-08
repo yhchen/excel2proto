@@ -119,9 +119,10 @@ function HandleHighLevelTypeCheck(): boolean {
 				const data = row.values[cIdx];
 
 				// if (!data) continue;
+				CHightTypeChecker.setRowData(row.values);
 				try {
-					if (!header.highCheck.checkType(data, row.values)) {
-						header.highCheck.checkType(data, row.values);
+					if (!header.highCheck.checkType(data)) {
+						header.highCheck.checkType(data);
 						throw '';
 					}
 				} catch (ex) {

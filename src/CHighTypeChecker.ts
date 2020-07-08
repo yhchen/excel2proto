@@ -4,12 +4,15 @@ import * as utils from './utils';
 let type_enums: any = undefined;
 let type_checker: any = undefined;
 let setHeaderNameMap: (headerNameMap: Map<string, number>) => void;
+let setRowData: (setRowData: Array<any>) => void;
 
 function InitEnv() {
 	try {
-		type_enums = require(CHightTypeChecker.TypeCheckerJSFilePath).enums;
-		type_checker = require(CHightTypeChecker.TypeCheckerJSFilePath).checker;
-		setHeaderNameMap = require(CHightTypeChecker.TypeCheckerJSFilePath).setHeaderNameMap;
+		const checker = require(CHightTypeChecker.TypeCheckerJSFilePath);
+		type_enums = checker.enums;
+		type_checker = checker.checker;
+		setHeaderNameMap = checker.setHeaderNameMap;
+		setRowData = checker.setRowData;
 	} catch (ex) {
 		utils.exception(`type_extens_checker: ${CHightTypeChecker.TypeCheckerJSFilePath} format error ${ex}`);
 		process.exit(utils.E_ERROR_LEVEL.INIT_EXTENDS);
@@ -27,8 +30,8 @@ function InitEnv() {
 	}
 }
 
-type CheckFuncType = (value: any, rowDatas: Array<any>) => boolean;
-function defaultFunc(value: any, rowDatas: Array<any>): boolean {
+type CheckFuncType = (value: any) => boolean;
+function defaultFunc(value: any): boolean {
 	return true;
 }
 const KeySet = new Set([',', '[', ']']);
@@ -53,10 +56,10 @@ class CTypeGenerator {
 			this.setLstMode(false);
 		}
 		const func = this._func;
-		this._func = (value: any, row): boolean => {
+		this._func = (value: any): boolean => {
 			if (!value) return true;
 			for (const v of value) {
-				if (!func(v, row)) {
+				if (!func(v)) {
 					return false;
 				}
 			}
@@ -70,9 +73,9 @@ class CTypeGenerator {
 		if (!this._lstMode) {
 			const lst = this._lst;
 			this._lst = []
-			this._func = (value: any, row): boolean => {
+			this._func = (value: any): boolean => {
 				for (let i = 0; i < lst.length; ++i) {
-					if (!lst[i](value[i], row))
+					if (!lst[i](value[i]))
 						return false;
 				}
 				return true;
@@ -106,10 +109,14 @@ export class CHightTypeChecker {
 		setHeaderNameMap(headerNameMap);
 	}
 
+	public static setRowData(rowData: Array<any>): void {
+		setRowData(rowData);
+	}
+
 	public get s() { return this._type; }
 
-	public checkType(obj: any, rowDatas: Array<any>): boolean {
-		return this._checkFunc(obj, rowDatas);
+	public checkType(obj: any): boolean {
+		return this._checkFunc(obj);
 	}
 
 	private initInner(generator: CTypeGenerator, s: string, idx: number) {
