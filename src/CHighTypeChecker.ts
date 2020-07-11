@@ -13,9 +13,13 @@ function InitEnv() {
 		type_checker = checker.checker;
 		setHeaderNameMap = checker.setHeaderNameMap;
 		setRowData = checker.setRowData;
-		const checkColContainsValueMap = new Map<string, (name: string, value: any) => boolean>();
+		const checkColContainsValueMap = new Map<string, { [key: string]: (value: any) => boolean }>();
 		for (const [k, v] of utils.ExportExcelDataMap) {
-			checkColContainsValueMap.set(k, v.checkColumnContainsValue.bind(v));
+			const Binder: { [key: string]: (value: any) => boolean } = {};
+			for (const header of v.arrTypeHeader) {
+				Binder[header.name] = v.checkColumnContainsValue.bind(v, header.name);
+			}
+			checkColContainsValueMap.set(k, Binder);
 		}
 		checker.initialize(checkColContainsValueMap);
 	} catch (ex) {
