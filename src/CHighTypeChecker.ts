@@ -7,16 +7,6 @@ let type_defines: any = undefined;
 let setHeaderNameMap: (headerNameMap: Map<string, number>) => void;
 let setRowData: (setRowData: Array<any>) => void;
 
-// const enum EDefineType {
-// 	Enum = 1,
-// 	SheetColumn = 2,
-// 	CheckerFunc = 3,
-// 	Defines = 4,
-// }
-
-// const GlboalDefines = new Map<any, { Type: EDefineType, Name: string; }>();
-// const GlobalNameDefines = new Map<string, { Type: EDefineType, Name: string, Data: any; }>();
-
 function InitEnv() {
 	try {
 		const checker = require(CHightTypeChecker.TypeCheckerJSFilePath);
@@ -31,15 +21,10 @@ function InitEnv() {
 			for (const header of ExcelData.arrTypeHeader) {
 				const handler = ExcelData.checkColumnContainsValue.bind(ExcelData, header.name);
 				Binder[header.name] = handler;
-				// AddGlobalDefines(`${SheetName}.${header.name}`, EDefineType.SheetColumn, handler);
 			}
 			checkColContainsValueMap.set(SheetName, Binder);
 		}
 		checker.initialize(checkColContainsValueMap);
-		// // initialize global defines...
-		// InitializeGlobalDefines();
-		// // initialize type defines...
-		// InitializeTypeDefines();
 	} catch (ex) {
 		utils.exceptionRecord(`type_extens_checker: ${CHightTypeChecker.TypeCheckerJSFilePath} format error ${ex}`);
 		process.exit(utils.E_ERROR_LEVEL.INIT_EXTENDS);
@@ -56,36 +41,6 @@ function InitEnv() {
 		type_enums[key] = newNode;
 	}
 }
-
-// function InitializeGlobalDefines() {
-// 	for (const Name in type_enums) {
-// 		if ((<Object>type_enums).hasOwnProperty(Name)) {
-// 			AddGlobalDefines(Name, EDefineType.Enum, type_enums[Name]);
-// 		}
-// 	}
-// 	for (const Name in type_checker) {
-// 		if ((<Object>type_checker).hasOwnProperty(Name)) {
-// 			AddGlobalDefines(Name, EDefineType.CheckerFunc, type_checker[Name]);
-// 		}
-// 	}
-// 	for (const Name in type_defines) {
-// 		if ((<Object>type_defines).hasOwnProperty(Name)) {
-// 			AddGlobalDefines(Name, EDefineType.Defines, type_defines[Name]);
-// 		}
-// 	}
-// }
-
-// function AddGlobalDefines(Name: string, Type: EDefineType, Data: any) {
-// 	if (GlobalNameDefines.has(Name)) {
-// 		utils.exception(`Duplicate Type Define: ${Name}`);
-// 	}
-// 	GlboalDefines.set(Data, { Type, Name });
-// 	GlobalNameDefines.set(Name, { Type, Name, Data });
-// }
-
-// function InitializeTypeDefines() {
-
-// }
 
 type CheckFuncType = (value: any) => boolean;
 function defaultFunc(value: any): boolean {
