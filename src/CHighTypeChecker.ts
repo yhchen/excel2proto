@@ -3,27 +3,45 @@ import * as utils from './utils';
 
 let type_enums: any = undefined;
 let type_checker: any = undefined;
+let type_defines: any = undefined;
 let setHeaderNameMap: (headerNameMap: Map<string, number>) => void;
 let setRowData: (setRowData: Array<any>) => void;
+
+// const enum EDefineType {
+// 	Enum = 1,
+// 	SheetColumn = 2,
+// 	CheckerFunc = 3,
+// 	Defines = 4,
+// }
+
+// const GlboalDefines = new Map<any, { Type: EDefineType, Name: string; }>();
+// const GlobalNameDefines = new Map<string, { Type: EDefineType, Name: string, Data: any; }>();
 
 function InitEnv() {
 	try {
 		const checker = require(CHightTypeChecker.TypeCheckerJSFilePath);
 		type_enums = checker.enums;
 		type_checker = checker.checker;
+		type_defines = checker.defines;
 		setHeaderNameMap = checker.setHeaderNameMap;
 		setRowData = checker.setRowData;
-		const checkColContainsValueMap = new Map<string, { [key: string]: (value: any) => boolean }>();
-		for (const [k, v] of utils.ExportExcelDataMap) {
-			const Binder: { [key: string]: (value: any) => boolean } = {};
-			for (const header of v.arrTypeHeader) {
-				Binder[header.name] = v.checkColumnContainsValue.bind(v, header.name);
+		const checkColContainsValueMap = new Map<string, { [key: string]: (value: any) => boolean; }>();
+		for (const [SheetName, ExcelData] of utils.ExportExcelDataMap) {
+			const Binder: { [key: string]: (value: any) => boolean; } = {};
+			for (const header of ExcelData.arrTypeHeader) {
+				const handler = ExcelData.checkColumnContainsValue.bind(ExcelData, header.name);
+				Binder[header.name] = handler;
+				// AddGlobalDefines(`${SheetName}.${header.name}`, EDefineType.SheetColumn, handler);
 			}
-			checkColContainsValueMap.set(k, Binder);
+			checkColContainsValueMap.set(SheetName, Binder);
 		}
 		checker.initialize(checkColContainsValueMap);
+		// // initialize global defines...
+		// InitializeGlobalDefines();
+		// // initialize type defines...
+		// InitializeTypeDefines();
 	} catch (ex) {
-		utils.exception(`type_extens_checker: ${CHightTypeChecker.TypeCheckerJSFilePath} format error ${ex}`);
+		utils.exceptionRecord(`type_extens_checker: ${CHightTypeChecker.TypeCheckerJSFilePath} format error ${ex}`);
 		process.exit(utils.E_ERROR_LEVEL.INIT_EXTENDS);
 	}
 	// convert enum (key -> value) to (value -> key)
@@ -38,6 +56,36 @@ function InitEnv() {
 		type_enums[key] = newNode;
 	}
 }
+
+// function InitializeGlobalDefines() {
+// 	for (const Name in type_enums) {
+// 		if ((<Object>type_enums).hasOwnProperty(Name)) {
+// 			AddGlobalDefines(Name, EDefineType.Enum, type_enums[Name]);
+// 		}
+// 	}
+// 	for (const Name in type_checker) {
+// 		if ((<Object>type_checker).hasOwnProperty(Name)) {
+// 			AddGlobalDefines(Name, EDefineType.CheckerFunc, type_checker[Name]);
+// 		}
+// 	}
+// 	for (const Name in type_defines) {
+// 		if ((<Object>type_defines).hasOwnProperty(Name)) {
+// 			AddGlobalDefines(Name, EDefineType.Defines, type_defines[Name]);
+// 		}
+// 	}
+// }
+
+// function AddGlobalDefines(Name: string, Type: EDefineType, Data: any) {
+// 	if (GlobalNameDefines.has(Name)) {
+// 		utils.exception(`Duplicate Type Define: ${Name}`);
+// 	}
+// 	GlboalDefines.set(Data, { Type, Name });
+// 	GlobalNameDefines.set(Name, { Type, Name, Data });
+// }
+
+// function InitializeTypeDefines() {
+
+// }
 
 type CheckFuncType = (value: any) => boolean;
 function defaultFunc(value: any): boolean {
@@ -81,14 +129,14 @@ class CTypeGenerator {
 		this._lstMode = v;
 		if (!this._lstMode) {
 			const lst = this._lst;
-			this._lst = []
+			this._lst = [];
 			this._func = (value: any): boolean => {
 				for (let i = 0; i < lst.length; ++i) {
 					if (!lst[i](value[i]))
 						return false;
 				}
 				return true;
-			}
+			};
 		}
 	}
 	public generate(): CheckFuncType {
@@ -172,7 +220,7 @@ export class CHightTypeChecker {
 			}
 			return (value: any) => {
 				return dataTable.checkColumnContainsValue(columnName, value);
-			}
+			};
 		} else if (s.indexOf('()') >= 0) {
 			// handle function check
 			const funcName = s.replace('()', '');
@@ -186,7 +234,7 @@ export class CHightTypeChecker {
 		if (!enumeration || isFunction(enumeration)) {
 			throw `Sheet High Type Format Error. checker_func ${utils.yellow_ul(s)} not found.`;
 		}
-		return (value: any) => { return enumeration[value] != undefined; }
+		return (value: any) => { return enumeration[value] != undefined; };
 	}
 
 	private _type: string;

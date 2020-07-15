@@ -71,7 +71,7 @@ function initialize(_ExportExcelDataMap) {
 
 	// >>>>>>>>>>>>>>>>>>>> reserved <<<<<<<<<<<<<<<<<<<<
 	// type define
-	// defines.ItemId = Sheet.Item.id,
+	// defines.ItemId = Sheet.Item.id;
 	// defines.Item = {
 	// 	Type: {
 	// 		Id: int,
@@ -101,7 +101,7 @@ let _headerNameMap;
 let _rowData;
 
 function setHeaderNameMap(headerNameMap) {
-	_headerNameMap = headerNameMap
+	_headerNameMap = headerNameMap;
 }
 
 function setRowData(rowData) {
