@@ -53,7 +53,7 @@ function VaildNumber(s: string): boolean {
 
 const WORDSCHAR = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
 const NUMCHAR = '0123456789';
-function FindWord(s: string, idx?: number): { start: number, end: number, len: number } | undefined {
+function FindWord(s: string, idx?: number): { start: number, end: number, len: number, } | undefined {
 	let first = true;
 	let start = 0, end = s.length - 1;
 	for (let i = idx ? idx : 0; i < s.length; ++i) {
@@ -74,7 +74,7 @@ function FindWord(s: string, idx?: number): { start: number, end: number, len: n
 	return (end >= start) && !first ? { start, end, len: end - start + 1 } : undefined;
 }
 
-function FindNum(s: string, idx?: number): { start: number, end: number, len: number } | undefined {
+function FindNum(s: string, idx?: number): { start: number, end: number, len: number, } | undefined {
 	let first = true;
 	let start = 0, end = s.length - 1;
 	for (let i = idx ? idx : 0; i < s.length; ++i) {
@@ -114,7 +114,7 @@ let FractionDigitsFMT = 6;
 console.log(`[TypeParser] : Default Float PrecisionFMT count is "${FractionDigitsFMT}"`);
 
 // number type range
-const NumberRangeMap = new Map<string, { min: number, max: number }>([
+const NumberRangeMap = new Map<string, { min: number, max: number, }>([
 	['char', { min: -127, max: 127 }],
 	['uchar', { min: 0, max: 255 }],
 	['short', { min: -32768, max: 32767 }],
@@ -148,7 +148,7 @@ export enum ETypeNames {
 	timestamp = 'timestamp', utctime = 'utctime',
 };
 
-const TypeDefaultValue = new Map<ETypeNames | undefined, { w: string, v: any }>([
+const TypeDefaultValue = new Map<ETypeNames | undefined, { w: string, v: any, }>([
 	[ETypeNames.char, { w: '0', v: 0 }], [ETypeNames.uchar, { w: '0', v: 0 }],
 	[ETypeNames.short, { w: '0', v: 0 }], [ETypeNames.ushort, { w: '0', v: 0 }],
 	[ETypeNames.int, { w: '0', v: 0 }], [ETypeNames.uint, { w: '0', v: 0 }],
@@ -179,7 +179,7 @@ export interface CType {
 	arr_level?: number; // array level
 	num?: number;
 	next?: CType;
-	obj?: { [name: string]: CType };
+	obj?: { [name: string]: CType; };
 }
 
 export class CTypeParser {
@@ -208,7 +208,7 @@ export class CTypeParser {
 		return (r !== undefined) ? r.w : '';
 	}
 	// get and set Date Format
-	public static set DateFmt(s: string) { DateFmt = s; console.log(`[TypeParser] : Change Date format to "${DateFmt}"`) }
+	public static set DateFmt(s: string) { DateFmt = s; console.log(`[TypeParser] : Change Date format to "${DateFmt}"`); }
 	public static get DateFmt(): string { return DateFmt; }
 	// get and set Tiny Date Format
 	public static set TinyDateFmt(s: string) { TinyDateFMT = s; console.log(`[TypeParser] : Change Tiny Date format to "${TinyDateFMT}"`); }
@@ -234,7 +234,7 @@ export class CTypeParser {
 	/**
 	 * @description parse content by type
 	 */
-	public ParseContent(value: { w?: string, v?: string | number | boolean | Date } | undefined): any {
+	public ParseContent(value: { w?: string, v?: string | number | boolean | Date, } | undefined): any {
 		if (value == undefined || value.w == undefined || NullStr(value.w))
 			return undefined;
 		switch (this._type.type) {
@@ -255,12 +255,12 @@ export class CTypeParser {
 				} else if (this._type.typename == ETypeNames.bool) {
 					return BooleanKeyMap.get(value.w.toLowerCase());
 				} else {
-					return value.w
+					return value.w;
 				}
 			case EType.date:
 				return _ParseDate(value.v, this._type);
 			default:
-				throw `unknown type = ${this._type.type}`
+				throw `unknown type = ${this._type.type}`;
 		}
 	}
 
@@ -312,7 +312,7 @@ function _FixArrayLevel(type: CType): number {
 	type.arr_level = 0;
 	return 0;
 }
-function _ParseType(p: { s: string, idx: number }): CType | undefined {
+function _ParseType(p: { s: string, idx: number, }): CType | undefined {
 	let thisNode: CType | undefined = undefined;
 	// skip write space
 	if (p.idx >= p.s.length) undefined;

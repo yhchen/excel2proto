@@ -3,7 +3,7 @@ import * as fs from 'fs-extra-promise';
 import * as xlsx from 'xlsx';
 import * as utils from './utils';
 import { ETypeNames, CTypeParser } from './CTypeParser';
-import { gCfg } from './config'
+import { gCfg } from './config';
 import { CHightTypeChecker } from './CHighTypeChecker';
 
 
@@ -85,7 +85,7 @@ function GetCellFrontGroudColor(cell: xlsx.CellObject): string {
 function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 	rIdx: number, RowMax: number, ColumnMax: number,
 	fileName: string, sheetName: string, DataTable: utils.SheetDataTable,
-	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string }>): number {
+	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string, }>): number {
 
 	rIdx = HandleWorkSheetHighTypeColumn(worksheet, rIdx, RowMax, ColumnMax, fileName, sheetName, DataTable, arrHeaderName);
 	for (; rIdx <= RowMax; ++rIdx) {
@@ -143,7 +143,7 @@ function HandleWorkSheetTypeColumn(worksheet: xlsx.WorkSheet,
 function HandleWorkSheetHighTypeColumn(worksheet: xlsx.WorkSheet,
 	rIdx: number, RowMax: number, ColumnMax: number,
 	fileName: string, sheetName: string, DataTable: utils.SheetDataTable,
-	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string }>): number {
+	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string, }>): number {
 	for (; rIdx <= RowMax; ++rIdx) {
 		const firstCell = GetCellData(worksheet, arrHeaderName[0].cIdx, rIdx);
 		if (firstCell == undefined || !utils.StrNotEmpty(firstCell.w)) {
@@ -173,7 +173,7 @@ function HandleWorkSheetHighTypeColumn(worksheet: xlsx.WorkSheet,
 function HandleWorkSheetNameColumn(worksheet: xlsx.WorkSheet,
 	rIdx: number, RowMax: number, ColumnMax: number,
 	fileName: string, sheetName: string, DataTable: utils.SheetDataTable,
-	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string }>): number {
+	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string, }>): number {
 	// find column name
 	for (; rIdx <= RowMax; ++rIdx) {
 		const firstCell = GetCellData(worksheet, 0, rIdx);
@@ -209,7 +209,7 @@ function HandleWorkSheetNameColumn(worksheet: xlsx.WorkSheet,
 function HandleWorkSheetDataColumn(worksheet: xlsx.WorkSheet,
 	rIdx: number, RowMax: number, ColumnMax: number,
 	fileName: string, sheetName: string, DataTable: utils.SheetDataTable,
-	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string }>): number {
+	arrHeaderName: Array<{ cIdx: number, name: string, parser: CTypeParser, color: string, }>): number {
 	for (; rIdx <= RowMax; ++rIdx) {
 		let firstCol = true;
 		const tmpArry = [];
@@ -267,7 +267,7 @@ function HandleWorkSheet(fileName: string, sheetName: string, worksheet: xlsx.Wo
 	const Range = xlsx.utils.decode_range(<string>worksheet['!ref']);
 	const ColumnMax = Range.e.c;
 	const RowMax = Range.e.r;
-	const arrHeaderName = new Array<{ cIdx: number, name: string, parser: CTypeParser, color: string }>();
+	const arrHeaderName = new Array<{ cIdx: number, name: string, parser: CTypeParser, color: string, }>();
 	// find max column and rows
 	let rIdx = 0;
 	const DataTable = new utils.SheetDataTable(sheetName, fileName);

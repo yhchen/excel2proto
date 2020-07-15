@@ -3,7 +3,7 @@ import * as path from "path";
 import * as utils from "../utils";
 import { ETypeNames, CType, EType, CTypeParser } from "../CTypeParser";
 
-const CSTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean }>([
+const CSTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean, }>([
 	[ETypeNames.char, { s: 'char', opt: false }],
 	[ETypeNames.uchar, { s: 'byte', opt: false }],
 	[ETypeNames.short, { s: 'short', opt: false }],
@@ -66,9 +66,9 @@ class CSDExport extends utils.IExportWrapper {
 		if (this._exportCfg.UseNamespace) {
 			let allUseNameSpace = '';
 			for (let nameSpace of this._exportCfg.UseNamespace) {
-				allUseNameSpace += `using ${nameSpace};${LineB}`
+				allUseNameSpace += `using ${nameSpace};${LineB}`;
 			}
-			interfaceContent = `${allUseNameSpace}${LineB}${interfaceContent}`
+			interfaceContent = `${allUseNameSpace}${LineB}${interfaceContent}`;
 		}
 		const outfile = path.join(outdir, dt.name + this._exportCfg.ExtName);
 		await fs.writeFileAsync(outfile, interfaceContent, { encoding: 'utf8', flag: 'w' });
@@ -123,9 +123,9 @@ class CSDExport extends utils.IExportWrapper {
 		if (this._exportCfg.UseNamespace) {
 			let allUseNameSpace = '';
 			for (let nameSpace of this._exportCfg.UseNamespace) {
-				allUseNameSpace += `using ${nameSpace};${LineB}`
+				allUseNameSpace += `using ${nameSpace};${LineB}`;
 			}
-			interfaceContent = `${allUseNameSpace}${LineB}${interfaceContent}`
+			interfaceContent = `${allUseNameSpace}${LineB}${interfaceContent}`;
 		}
 		await fs.writeFileAsync(outdir, interfaceContent, { encoding: 'utf8', flag: 'w' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
@@ -134,7 +134,7 @@ class CSDExport extends utils.IExportWrapper {
 	}
 
 	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[]): string | undefined {
-		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader)
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader);
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
 			return;

@@ -6,7 +6,7 @@ import { ESheetRowType } from "../utils";
 function ParseCSVLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow, exportCfg: utils.ExportCfg): string {
 	let tmpArry = new Array<string>();
 	for (let i = 0; i < header.length; ++i) {
-		let value: any = ''; 
+		let value: any = '';
 		if (sheetRow.type == ESheetRowType.header) {
 			value = sheetRow.values[i];
 		} else if (sheetRow.type == ESheetRowType.data) {
@@ -16,7 +16,7 @@ function ParseCSVLine(header: Array<utils.SheetHeader>, sheetRow: utils.SheetRow
 			}
 			value = sheetRow.values[cIdx];
 		}
-		
+
 		let tmpValue = '';
 		if (value == null) {
 			if (exportCfg.UseDefaultValueIfEmpty) {
@@ -64,7 +64,7 @@ class CSVExport extends utils.IExportWrapper {
 			return false;
 		}
 		let arrTmp = new Array<string>();
-		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader);
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
 			return true;

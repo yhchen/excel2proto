@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs';
-import { execute } from './works'
-import * as utils from './utils'
-import * as config from './config'
+import { execute } from './works';
+import * as utils from './utils';
+import * as config from './config';
 
 
 ////////////////////////////////////////////////////////////////////////////////

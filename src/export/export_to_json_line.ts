@@ -10,12 +10,12 @@ class JSONExport extends utils.IExportWrapper {
 	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let tabIds: number[] = [];
-		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader);
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
 			return true;
 		}
-		let conentText = ""
+		let conentText = "";
 		for (let row of dt.arrValues) {
 			let item = this.ParseJsonLine(arrExportHeader, row, tabIds, this._exportCfg);
 			if (item) {

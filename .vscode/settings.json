@@ -16,5 +16,7 @@
         "node_modules": true,
         "package-lock.json": true
     },
-    "editor.snippetSuggestions": "bottom"
+    "editor.snippetSuggestions": "bottom",
+    "javascript.format.semicolons": "insert",
+    "typescript.format.semicolons": "insert"
 }

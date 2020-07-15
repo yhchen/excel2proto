@@ -29,7 +29,7 @@ function ParseJsonObject(exportWrapper: utils.IExportWrapper, header: Array<util
 type IExportToSingleLuaData = {
 	head: string;
 	data: string;
-}
+};
 
 // export to single lua file
 function exportToSingleLuaContent(exportWrapper: utils.IExportWrapper, sheetName: string, header: Array<utils.SheetHeader>, jsObj: any, shortName: boolean = false): IExportToSingleLuaData {
@@ -66,7 +66,7 @@ class LuaExport extends utils.IExportWrapper {
 	protected async ExportTo(dt: utils.SheetDataTable): Promise<boolean> {
 		const outdir = this._exportCfg.OutputDir;
 		let jsonObj = { ids: [] };
-		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader);
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(dt.name)} : No Column To Export.`);
 			return true;

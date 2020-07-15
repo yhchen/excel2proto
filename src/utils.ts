@@ -14,7 +14,7 @@ export const orange_ul = chalk.magentaBright.underline.bold;	//orange under line
 export const yellow = chalk.yellow;
 export const red = chalk.redBright;
 export const green = chalk.greenBright;
-export const brightWhite = chalk.whiteBright.bold
+export const brightWhite = chalk.whiteBright.bold;
 //#endregion
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ export class AsyncWorkMonitor {
 			if (this._leftCnt <= 0) {
 				return true;
 			}
-			await this.delay()
+			await this.delay();
 		}
 	}
 	public async delay(ms: number = 0) {
@@ -143,7 +143,7 @@ export type SheetRow = {
 	type: ESheetRowType,
 	values: Array<any>,
 	rIdx: number;
-}
+};
 export type SheetHeader = {
 	name: string, // name
 	shortName: string, //shortName
@@ -153,7 +153,7 @@ export type SheetHeader = {
 	comment: boolean; // is comment line?
 	color: string; // group
 	highCheck?: CHightTypeChecker;
-}
+};
 export class SheetDataTable {
 	public constructor(name: string, filename: string) {
 		this.name = name;
@@ -219,7 +219,7 @@ export type ExportCfg = {
 	OutputDir: string;
 	OutputDataDir?: string;
 	UseDefaultValueIfEmpty: boolean;
-	NameTranslate?: { [key: string]: string }; // translate name to target name
+	NameTranslate?: { [key: string]: string; }; // translate name to target name
 	GroupFilter: Array<string>;
 	ExportTemple?: string;
 	ExtName?: string;
@@ -228,7 +228,7 @@ export type ExportCfg = {
 	UseShortName?: boolean;
 	UseNamespace?: Array<string>;
 
-}
+};
 // export template
 export abstract class IExportWrapper {
 	public constructor(exportCfg: ExportCfg) {
@@ -367,7 +367,7 @@ export module FMT26 {
 		return result;
 	}
 
-	export function StringToColRow(str: string): { row: number, col: number } {
+	export function StringToColRow(str: string): { row: number, col: number, } {
 		let ret = { row: 0, col: 0 };
 		for (let i = 0; i < str.length; ++i) {
 			if (WORDS.indexOf(str[i]) < 0) {

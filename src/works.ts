@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs-extra-promise';
 import * as utils from './utils';
-import { gCfg, gRootDir, gGlobalIgnoreDirName } from './config'
-import { HandleExcelFile } from './excel_utils'
+import { gCfg, gRootDir, gGlobalIgnoreDirName } from './config';
+import { HandleExcelFile } from './excel_utils';
 import { CHightTypeChecker } from './CHighTypeChecker';
 
 const gExportWrapperLst = new Array<utils.IExportWrapper>();
@@ -72,7 +72,7 @@ async function HandleReadData(): Promise<boolean> {
 	let ret = true;
 	const cb = (v: boolean) => {
 		ret = ret && v;
-	}
+	};
 	for (let fileOrPath of gCfg.IncludeFilesAndPath) {
 		if (!path.isAbsolute(fileOrPath)) {
 			fileOrPath = path.join(gRootDir, fileOrPath);

@@ -5,7 +5,7 @@ import { ETypeNames, CType, EType } from "../CTypeParser";
 import * as protobufjs from 'protobufjs';
 import { isArray } from "lodash";
 
-const PBTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean }>([
+const PBTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean, }>([
 	[ETypeNames.char, { s: 'sint32', opt: false }],
 	[ETypeNames.uchar, { s: 'uint32', opt: false }],
 	[ETypeNames.short, { s: 'sint32', opt: false }],
@@ -75,7 +75,7 @@ class PBExport3 extends utils.IExportWrapper {
 		// 	utils.exception("proto3 format export to separate file was not support!");
 		// }
 		if (!this._exportCfg.OutputDataDir) {
-			utils.exception("proto3 Export.OutputDataDir was not set!")
+			utils.exception("proto3 Export.OutputDataDir was not set!");
 		}
 		if (!this.CreateDir(path.dirname(outdir))) {
 			utils.exception(`create output path "${utils.yellow_ul(path.dirname(outdir))}" failure!`);
@@ -125,8 +125,8 @@ class PBExport3 extends utils.IExportWrapper {
 		return true;
 	}
 
-	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[], tempMessage: string[]): { pbtype: string } | undefined {
-		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader)
+	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[], tempMessage: string[]): { pbtype: string; } | undefined {
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader);
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
 			return;
@@ -138,7 +138,7 @@ class PBExport3 extends utils.IExportWrapper {
 			type += `    ${this.GenTypeName(header.typeChecker.type, tempMessage)} ${this.TranslateColName(header.name)} = ${header.cIdx + 1};${utils.LineBreaker}`;
 		}
 		type += `}${utils.LineBreaker}`;
-		type += `message Arr${sheetName}${utils.LineBreaker}{${utils.LineBreaker}repeated ${sheetName} Rows = 1;${utils.LineBreaker}}${utils.LineBreaker}`
+		type += `message Arr${sheetName}${utils.LineBreaker}{${utils.LineBreaker}repeated ${sheetName} Rows = 1;${utils.LineBreaker}}${utils.LineBreaker}`;
 		return { pbtype: type, };
 	}
 
@@ -203,7 +203,7 @@ class PBExport3 extends utils.IExportWrapper {
 			if (value.length <= 0 || !isArray(value[0])) {
 				return { a: value };
 			}
-			const ret: { a: any[] } = { a: [] };
+			const ret: { a: any[]; } = { a: [] };
 			for (const subvalue of value) {
 				ret.a.push(this.TranslateValue(subvalue));
 			}
@@ -215,12 +215,12 @@ class PBExport3 extends utils.IExportWrapper {
 	private async ExportData(dt: utils.SheetDataTable, outputFile: string) {
 		if (this._protoRoot == null) return;
 		const protoEncoder = this._protoRoot.lookupType(`${this._exportCfg.Namespace ? this._exportCfg.Namespace + '.' : ''}Arr${dt.name}`);
-		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader)
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, dt.arrTypeHeader);
 		if (arrExportHeader.length <= 0) {
 			return;
 		}
 
-		const exportData: { Rows: any[] } = { Rows: [] };
+		const exportData: { Rows: any[]; } = { Rows: [] };
 		for (let row = 0; row < dt.arrValues.length; ++row) {
 			if (dt.arrValues[row].type != utils.ESheetRowType.data) continue;
 			const data = dt.arrValues[row].values;

@@ -3,7 +3,7 @@ import * as path from "path";
 import * as utils from "../utils";
 import { ETypeNames, CType, EType } from "../CTypeParser";
 
-const TSTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean }>([
+const TSTypeTranslateMap = new Map<ETypeNames, { s: string, opt: boolean, }>([
 	[ETypeNames.char, { s: 'number', opt: false }],
 	[ETypeNames.uchar, { s: 'number', opt: false }],
 	[ETypeNames.short, { s: 'number', opt: false }],
@@ -114,8 +114,8 @@ class TSDExport extends utils.IExportWrapper {
 		return true;
 	}
 
-	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[]): { type: string, tbtype: string } | undefined {
-		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader)
+	private GenSheetType(sheetName: string, arrHeader: utils.SheetHeader[]): { type: string, tbtype: string, } | undefined {
+		const arrExportHeader = utils.ExecGroupFilter(this._exportCfg.GroupFilter, arrHeader);
 		if (arrExportHeader.length <= 0) {
 			utils.debug(`Pass Sheet ${utils.yellow_ul(sheetName)} : No Column To Export.`);
 			return;
@@ -127,7 +127,7 @@ class TSDExport extends utils.IExportWrapper {
 			type += `    ${this.TranslateColName(header.name)}${this.GenTypeName(header.typeChecker.type, false)};\n`;
 		}
 		type += '}\n';
-		let tbtype = `type T${sheetName} = {[Key in number|string]?: ${sheetName}};\n`
+		let tbtype = `type T${sheetName} = {[Key in number|string]?: ${sheetName}};\n`;
 		return { type, tbtype };
 	}
 
