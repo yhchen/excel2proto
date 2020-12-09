@@ -36,7 +36,7 @@ if [ ! "$1" == "0" ]; then
 
 	echo ======================================================
 	echo = execute build config files
-	node ./bin/index.js
+	node ./dist/index.js
 fi
 
 ECHO_SPEED_UP_HELP() {

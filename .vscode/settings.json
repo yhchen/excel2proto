@@ -3,12 +3,12 @@
         "**/.git/**/*": true,
         "**/.git/objects/**": false,
         "**/.git/subtree-cache/**": false,
-        "**/bin/**/*": true,
+        "**/dist/**/*": true,
         "**/node_modules/**/*": true,
         "**/node_modules/*/**": false
     },
     "search.exclude": {
-        "**/bin": true
+        "**/dist": true
     },
     "editor.insertSpaces": false,
     "files.exclude": {

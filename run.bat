@@ -37,7 +37,7 @@ if not "%1" == "0" (
 
 	echo ======================================================
 	echo = execute build config files
-	call node ./bin/index.js
+	call node ./dist/index.js
 	pause
 )
 GOTO :EOF
