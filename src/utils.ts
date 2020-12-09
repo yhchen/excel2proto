@@ -326,14 +326,8 @@ export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<S
 
 export type ExportWrapperFactory = (cfg: ExportCfg) => IExportWrapper;
 export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
-	['csv', require('./export/export_to_csv')],
-	['csharp', require('./export/export_to_csharp')],
-	['json', require('./export/export_to_json')],
-	['js', require('./export/export_to_js')],
-	['tsd', require('./export/export_to_tsd')],
-	['lua', require('./export/export_to_lua')],
-	['jsonline', require('./export/export_to_json_line')],
 	['proto3', require('./export/export_to_proto3')],
+	['proto_net', require('./export/export_to_proto_net')],
 ]);
 
 //#endregion

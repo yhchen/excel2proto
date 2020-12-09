@@ -1,4 +1,6 @@
-# excel_tiny_wrapper
+# excel2proto
+
+fork from: [https://github.com/yhchen/excel_tiny_wrapper](https://github.com/yhchen/excel_tiny_wrapper)
 
 ## excel export with type check using nodejs in super fast speed
 
@@ -16,12 +18,6 @@
 
 type|desc
 ---|---
-csv|csv format
-json|Export as `json` format. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
-js|Export as `js` format. <br>Set `Export.ExportTemple` for export template. The tools will replace `{name}` with sheet name, and replace `{data}` with sheet data. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
-tsd|Export *.d.ts file for language `typescript` type check. <br>Set `Export.ExportTemple` for export template. The tools will replace `{type}` with table type, and replace `{data}` with row type. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
-lua|Export as `lua table` format. <br>Support Key name Compress if `Export.UseShortName` is true. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
-csharp(c#)|Export as `csharp(c#)` code. <br>Support {customData} replace is `ExportTemple` if `Export.CustomDataNode` set to be a sheet cell. <br>Configuration `UseNamespace` can be exported `using XXX1; Using XXX2 `at the beginning of the code. <br>If `Export.OutputDir` is a directory. Export as a separate file per sheet, otherwise export as one file.
 proto3|Export as protobuf Version 3.x header. <br>Set `Export.OutputDataDir` to choose where to export to data files. `OutputDataDir` support directory only! <br>`Export.OutputDir` support directory only too!
 jsonline|Export each line as as `json` format each line end with `Export.`, Compatible with ET Framework. see: [https://github.com/egametang/ET](#https://github.com/egametang/ET)
 
@@ -60,14 +56,20 @@ type|desc
 `vector2`           | Equals to `float[2]`
 `vector3`           | Equals to `float[3]`
 
+
+### custom defined type
+
+
 ### Simple Array Format
 
 Separator :
 
-* "`,`" is the first level separator
-* "`;`" is the second level separator
+* "`;`" is the first level separator
+* "`|`" is the second level separator
 * "`\n`" is the third level separator
 
 Example :
-> Type : `int[][]`  
-> Data : `1,2;3,4,5`  
+
+> Type : `int[][]` 
+
+> Data : `1;23|4;5`
