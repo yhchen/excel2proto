@@ -98,7 +98,6 @@
             ],
             "ExportTemple": "local {name} = {data}\n\nreturn {name}",
             "UseDefaultValueIfEmpty": false,
-            "UseShortName": true
         },
         {
             "type": "lua",
@@ -127,7 +126,6 @@
             },
             "IDUseGeterAndSeter": true,
             "cm01": "only support for c#",
-            "UseShortName": true
         },
         {
             "type": "csharp",
@@ -147,7 +145,6 @@
             "NameTranslate": {
                 "Id": "_id"
             },
-            "UseShortName": true
         },
         {
             "type": "proto3",
@@ -163,7 +160,6 @@
             "NameTranslate": {
                 "Id": "_id"
             },
-            "UseShortName": true
         },
         {
             "type": "jsonline",

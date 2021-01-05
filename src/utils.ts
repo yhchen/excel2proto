@@ -221,13 +221,10 @@ export type ExportCfg = {
 	UseDefaultValueIfEmpty: boolean;
 	NameTranslate?: { [key: string]: string; }; // translate name to target name
 	GroupFilter: Array<string>;
-	ExportTemple?: string;
 	ExtName?: string;
 	Namespace?: string; // for csharp
 	IDUseGeterAndSeter?: boolean;
-	UseShortName?: boolean;
 	UseNamespace?: Array<string>;
-
 };
 // export template
 export abstract class IExportWrapper {

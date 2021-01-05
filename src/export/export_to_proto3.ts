@@ -83,14 +83,6 @@ class PBExport3 extends utils.IExportWrapper {
 		if (!this.CreateDir(this._exportCfg.OutputDataDir)) {
 			utils.exception(`create output path "${utils.yellow_ul(this._exportCfg.OutputDataDir)}" failure!`);
 		}
-		let FMT: string | undefined = this._exportCfg.ExportTemple;
-		if (FMT == undefined) {
-			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not defined!`);
-		}
-		if (FMT.indexOf('{data}') < 0) {
-			utils.exception(`[Config Error] ${utils.yellow_ul("Export.ExportTemple")} not found Keyword ${utils.yellow_ul("{data}")}!`);
-		}
-
 		let data = '';
 		const array = [];
 		for (let [k, v] of utils.ExportExcelDataMap) {
@@ -111,7 +103,7 @@ class PBExport3 extends utils.IExportWrapper {
 
 		const PackageContent = this._exportCfg.Namespace ? `package ${this._exportCfg.Namespace};${utils.LineBreaker}` : "";
 		data = `${tempMessage.join(utils.LineBreaker)}${data}`;
-		data = `syntax = "proto3";${utils.LineBreaker}${utils.LineBreaker}${PackageContent}${utils.LineBreaker}` + FMT.replace('{data}', data);
+		data = `syntax = "proto3";${utils.LineBreaker}${utils.LineBreaker}${PackageContent}${utils.LineBreaker}` + data;
 		await fs.writeFileAsync(outdir, data, { encoding: 'utf8', flag: 'w' });
 		utils.debug(`${utils.green('[SUCCESS]')} Output file "${utils.yellow_ul(outdir)}". `
 			+ `Total use tick:${utils.green(utils.TimeUsed.LastElapse())}`);
