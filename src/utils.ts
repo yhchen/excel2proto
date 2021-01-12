@@ -215,7 +215,6 @@ export function SetLineBreaker(v: string) {
 //#region export config
 
 export type ExportCfg = {
-	type: string;
 	OutputDir: string;
 	OutputDataDir?: string;
 	UseDefaultValueIfEmpty: boolean;
@@ -223,8 +222,6 @@ export type ExportCfg = {
 	GroupFilter: Array<string>;
 	ExtName?: string;
 	Namespace?: string; // for csharp
-	IDUseGeterAndSeter?: boolean;
-	UseNamespace?: Array<string>;
 };
 // export template
 export abstract class IExportWrapper {
@@ -266,8 +263,8 @@ export abstract class IExportWrapper {
 		}
 		return ok;
 	}
-	protected abstract async ExportTo(dt: SheetDataTable): Promise<boolean>;
-	protected abstract async ExportGlobal(): Promise<boolean>;
+	protected abstract ExportTo(dt: SheetDataTable): Promise<boolean>;
+	protected abstract ExportGlobal(): Promise<boolean>;
 	protected CreateDir(outdir: string): boolean {
 		if (!fs.existsSync(outdir)) {
 			fs.ensureDirSync(outdir);
@@ -319,13 +316,6 @@ export function ExecGroupFilter(arrGrpFilters: Array<string>, arrHeader: Array<S
 
 	return result;
 }
-
-
-export type ExportWrapperFactory = (cfg: ExportCfg) => IExportWrapper;
-export const ExportWrapperMap = new Map<string, ExportWrapperFactory>([
-	['proto3', require('./export/export_to_proto3')],
-	['proto_net', require('./export/export_to_proto_net')],
-]);
 
 //#endregion
 

@@ -229,4 +229,4 @@ class PBExport3 extends utils.IExportWrapper {
 	}
 }
 
-module.exports = function (exportCfg: utils.ExportCfg): utils.IExportWrapper { return new PBExport3(exportCfg); };
+export function ExportFactory(exportCfg: utils.ExportCfg): utils.IExportWrapper { return new PBExport3(exportCfg); };

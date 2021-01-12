@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FMT26 = exports.ExportWrapperMap = exports.ExecGroupFilter = exports.IExportWrapper = exports.SetLineBreaker = exports.LineBreaker = exports.ExportExcelDataMap = exports.SheetDataTable = exports.ESheetRowType = exports.AsyncWorkMonitor = exports.TimeUsed = exports.SetBeforeExistHandler = exports.StrNotEmpty = exports.exceptionRecord = exports.exception = exports.warn = exports.debug = exports.logger = exports.brightWhite = exports.green = exports.red = exports.yellow = exports.orange_ul = exports.yellow_ul = void 0;
+exports.FMT26 = exports.ExecGroupFilter = exports.IExportWrapper = exports.SetLineBreaker = exports.LineBreaker = exports.ExportExcelDataMap = exports.SheetDataTable = exports.ESheetRowType = exports.AsyncWorkMonitor = exports.TimeUsed = exports.SetBeforeExistHandler = exports.StrNotEmpty = exports.exceptionRecord = exports.exception = exports.warn = exports.debug = exports.logger = exports.brightWhite = exports.green = exports.red = exports.yellow = exports.orange_ul = exports.yellow_ul = void 0;
 const fs = __importStar(require("fs-extra"));
 var lodash_1 = require("lodash");
 Object.defineProperty(exports, "isString", { enumerable: true, get: function () { return lodash_1.isString; } });
@@ -321,16 +321,6 @@ function ExecGroupFilter(arrGrpFilters, arrHeader) {
     return result;
 }
 exports.ExecGroupFilter = ExecGroupFilter;
-exports.ExportWrapperMap = new Map([
-    ['csv', require('./export/export_to_csv')],
-    ['csharp', require('./export/export_to_csharp')],
-    ['json', require('./export/export_to_json')],
-    ['js', require('./export/export_to_js')],
-    ['tsd', require('./export/export_to_tsd')],
-    ['lua', require('./export/export_to_lua')],
-    ['jsonline', require('./export/export_to_json_line')],
-    ['proto3', require('./export/export_to_proto3')],
-]);
 //#endregion
 ////////////////////////////////////////////////////////////////////////////////
 //#region Format Converter

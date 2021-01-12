@@ -35,16 +35,11 @@ const utils = __importStar(require("./utils"));
 const config_1 = require("./config");
 const excel_utils_1 = require("./excel_utils");
 const CHighTypeChecker_1 = require("./CHighTypeChecker");
+const export_to_proto3 = __importStar(require("./export/export_to_proto3"));
 const gExportWrapperLst = new Array();
 function InitEnv() {
     for (const exportCfg of config_1.gCfg.Export) {
-        const Constructor = utils.ExportWrapperMap.get(exportCfg.type);
-        if (Constructor == undefined) {
-            utils.exceptionRecord(utils.red(`Export is not currently supported for the current type "${utils.yellow_ul(exportCfg.type)}"!\n` +
-                `ERROR : Export constructor not found. initialize failure!`));
-            return false;
-        }
-        const Exportor = Constructor.call(Constructor, exportCfg);
+        const Exportor = export_to_proto3.ExportFactory(exportCfg);
         if (Exportor) {
             if (exportCfg.ExtName == undefined) {
                 exportCfg.ExtName = Exportor.DefaultExtName;
