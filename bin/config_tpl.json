@@ -35,7 +35,7 @@
     ],
     "see: http://momentjs.com/docs/#/parsing/string-format/": null,
     "DateFmt": "YYYY/MM/DD HH:mm:ss",
-    "TypeCheckerJSFilePath": "",
+    "TypeCheckerJSFilePath": "./testcase/type_extens_checker.js",
     "cm21": "relative to ${cwd} or absolute path",
     "TinyDateFmt": "YYYY/MM/DD",
     "TimeStampUseMS": true,

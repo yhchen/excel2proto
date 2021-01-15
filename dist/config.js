@@ -69,7 +69,7 @@ function InitGlobalConfig(fpath = '') {
             gPath = path.join(exports.gRootDir, gPath);
         }
         if (!fs.existsSync(gPath)) {
-            utils.exception("config : {TypeCheckerJSFilePath} incorrect! path not found!");
+            utils.exception(`config : {TypeCheckerJSFilePath}: ${gPath} incorrect! path not found!`);
         }
         CHighTypeChecker_1.CHightTypeChecker.TypeCheckerJSFilePath = gPath;
         try {

@@ -58,6 +58,7 @@ exports.TestTypeParser = exports.CTypeParser = exports.ETypeNames = void 0;
  *      -----------------------------------------------------------------------------
  *      | vector3           | float[3]                                              |
  *      -----------------------------------------------------------------------------
+ *
  */
 const lodash_1 = require("lodash");
 const moment = __importStar(require("moment"));
