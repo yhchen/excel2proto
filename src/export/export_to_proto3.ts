@@ -130,7 +130,7 @@ class PBExport3 extends utils.IExportWrapper {
 			type += `    ${this.GenTypeName(header.typeChecker.type, tempMessage)} ${this.TranslateColName(header.name)} = ${header.cIdx + 1};${utils.LineBreaker}`;
 		}
 		type += `}${utils.LineBreaker}`;
-		type += `message Arr${sheetName}${utils.LineBreaker}{${utils.LineBreaker}repeated ${sheetName} Rows = 1;${utils.LineBreaker}}${utils.LineBreaker}`;
+		type += `message Arr${sheetName}${utils.LineBreaker}{${utils.LineBreaker}    repeated ${sheetName} Rows = 1;${utils.LineBreaker}}${utils.LineBreaker}`;
 		return { pbtype: type, };
 	}
 
